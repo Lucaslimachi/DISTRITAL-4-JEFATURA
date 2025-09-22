@@ -198,7 +198,6 @@
                     return;
                 }
 
-                // El token del admin ya debe estar en localStorage
                 const adminToken = localStorage.getItem('jwtToken');
                 if (!adminToken) {
                     alert('Error: Token de administrador no encontrado.');
@@ -210,7 +209,8 @@
                 const role = regRole.value;
 
                 try {
-                    const response = await fetch('http://localhost:3001/register', {
+                    const API_BASE_URL = 'https://distrital-4-jefatura-api.onrender.com'; // Reemplaza con la URL de tu backend en Render
+                    const response = await fetch(`${API_BASE_URL}/register`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -225,7 +225,6 @@
                         alert(data.message);
                         modal.style.display = 'none'; // Cerrar modal
                         registerForm.reset(); // Limpiar formulario
-                        // Opcional: recargar la lista de usuarios si el modal está abierto
                         if (usersModal.style.display === 'flex') {
                             fetchUsers(); 
                         }
@@ -247,7 +246,8 @@
                 }
 
                 try {
-                    const response = await fetch('http://localhost:3001/users', {
+                    const API_BASE_URL = 'https://distrital-4-jefatura-api.onrender.com'; // Reemplaza con la URL de tu backend en Render
+                    const response = await fetch(`${API_BASE_URL}/users`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${adminToken}`
@@ -265,10 +265,7 @@
                         const ul = document.createElement('ul');
                         usersData.forEach(user => {
                             const li = document.createElement('li');
-                            // Corregir: Usar loggedInUserId del localStorage para la comparación
                             li.innerHTML = `ID: ${user.id}, Usuario: ${user.username}, Rol: ${user.role}`;
-                            
-                            // Añadir botón de eliminar para administradores
                             if (userRole === 'admin' && user.id !== parseInt(loggedInUserId)) {
                                 const deleteBtn = document.createElement('button');
                                 deleteBtn.textContent = 'Eliminar';
@@ -301,7 +298,8 @@
                 }
 
                 try {
-                    const response = await fetch(`http://localhost:3001/users/${userId}`, {
+                    const API_BASE_URL = 'https://distrital-4-jefatura-api.onrender.com'; // Reemplaza con la URL de tu backend en Render
+                    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
                         method: 'DELETE',
                         headers: {
                             'Authorization': `Bearer ${adminToken}`
