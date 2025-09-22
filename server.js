@@ -33,11 +33,14 @@ function writeNovedades(novedades) {
 
 // Funciones auxiliares para leer y escribir usuarios
 function readUsers() {
+  console.log('BACKEND DEBUG: Intentando leer usuarios de:', usersFilePath);
   if (fs.existsSync(usersFilePath)) {
     const data = fs.readFileSync(usersFilePath, 'utf8');
-    return JSON.parse(data);
+    const users = JSON.parse(data);
+    console.log('BACKEND DEBUG: Usuarios leídos (después de parsear): ', users.map(u => u.username));
+    return users;
   }
-  // Si el archivo no existe, inicializar con el usuario admin por defecto
+  console.log('BACKEND DEBUG: El archivo de usuarios no existe, inicializando con usuario admin.');
   const initialUsers = [
     { id: 1, username: 'admin', password: '$2b$10$RUpwExm7ZRkki8L6blId9ev3EYdDzGfXza98mGdZemSICPbUrqC32', role: 'admin' } // Contraseña: hijoteamo2
   ];
@@ -46,7 +49,10 @@ function readUsers() {
 }
 
 function writeUsers(users) {
+  console.log('BACKEND DEBUG: Intentando escribir usuarios en:', usersFilePath);
+  console.log('BACKEND DEBUG: Usuarios a escribir:', users.map(u => u.username));
   fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2), 'utf8');
+  console.log('BACKEND DEBUG: Usuarios escritos exitosamente.');
 }
 
 // Middleware para autenticación JWT
@@ -144,6 +150,7 @@ app.post('/register', authenticateToken, authorizeRoles(['admin']), async (req, 
   const newUser = { id: users.length + 1, username, password: hashedPassword, role: role || 'user' }; 
   users.push(newUser);
   writeUsers(users); // Escribir usuarios actualizados
+  console.log('BACKEND DEBUG: Estado de usuarios después del registro:', users.map(u => u.username));
 
   res.status(201).json({ message: 'Usuario registrado exitosamente', user: { id: newUser.id, username: newUser.username, role: newUser.role } });
 });
@@ -159,6 +166,7 @@ app.post('/login', async (req, res) => {
   }
 
   const users = readUsers(); // Leer usuarios
+  console.log('BACKEND DEBUG: Usuarios cargados para login:', users.map(u => u.username));
   const user = users.find(u => u.username === username);
   if (!user) {
     console.log(`BACKEND DEBUG: Usuario ${username} no encontrado.`);
