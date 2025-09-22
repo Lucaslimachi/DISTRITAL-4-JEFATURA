@@ -249,6 +249,7 @@ app.delete('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-o
 
 // Ruta de registro
 app.post('/register', authenticateToken, authorizeRoles(['admin']), async (req, res) => {
+  console.log('BACKEND DEBUG: Petición de registro recibida.');
   const { username, password, role } = req.body; // Ahora podemos especificar el rol al registrar
 
   if (!username || !password) {
