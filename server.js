@@ -8,11 +8,12 @@ const app = express();
 const PORT = process.env.PORT || 3001; // Cambiado a 3001 temporalmente
 
 const novedadesFilePath = path.join(__dirname, 'novedades.json');
+const usersFilePath = path.join(__dirname, 'users.json');
 
 // Usuarios en memoria (simulando una base de datos)
-const users = [
-  { id: 1, username: 'admin', password: '$2b$10$RUpwExm7ZRkki8L6blId9ev3EYdDzGfXza98mGdZemSICPbUrqC32', role: 'admin' } // Contraseña: hijoteamo2
-]; // { username, password, role: 'user' | 'admin' }
+// const users = [
+//   { id: 1, username: 'admin', password: '$2b$10$RUpwExm7ZRkki8L6blId9ev3EYdDzGfXza98mGdZemSICPbUrqC32', role: 'admin' } // Contraseña: hijoteamo2
+// ]; // { username, password, role: 'user' | 'admin' }
 
 // Clave secreta para JWT (debería ser una variable de entorno en producción)
 const JWT_SECRET = 'supersecretkey'; 
@@ -28,6 +29,24 @@ function readNovedades() {
 
 function writeNovedades(novedades) {
   fs.writeFileSync(novedadesFilePath, JSON.stringify(novedades, null, 2), 'utf8');
+}
+
+// Funciones auxiliares para leer y escribir usuarios
+function readUsers() {
+  if (fs.existsSync(usersFilePath)) {
+    const data = fs.readFileSync(usersFilePath, 'utf8');
+    return JSON.parse(data);
+  }
+  // Si el archivo no existe, inicializar con el usuario admin por defecto
+  const initialUsers = [
+    { id: 1, username: 'admin', password: '$2b$10$RUpwExm7ZRkki8L6blId9ev3EYdDzGfXza98mGdZemSICPbUrqC32', role: 'admin' } // Contraseña: hijoteamo2
+  ];
+  writeUsers(initialUsers);
+  return initialUsers;
+}
+
+function writeUsers(users) {
+  fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2), 'utf8');
 }
 
 // Middleware para autenticación JWT
@@ -114,6 +133,7 @@ app.post('/register', authenticateToken, authorizeRoles(['admin']), async (req, 
     return res.status(400).json({ message: 'Se requieren nombre de usuario y contraseña' });
   }
 
+  const users = readUsers(); // Leer usuarios
   const existingUser = users.find(u => u.username === username);
   if (existingUser) {
     return res.status(400).json({ message: 'El nombre de usuario ya existe' });
@@ -123,6 +143,7 @@ app.post('/register', authenticateToken, authorizeRoles(['admin']), async (req, 
   // El rol ahora puede ser especificado por el admin, si no, por defecto 'user'
   const newUser = { id: users.length + 1, username, password: hashedPassword, role: role || 'user' }; 
   users.push(newUser);
+  writeUsers(users); // Escribir usuarios actualizados
 
   res.status(201).json({ message: 'Usuario registrado exitosamente', user: { id: newUser.id, username: newUser.username, role: newUser.role } });
 });
@@ -130,52 +151,59 @@ app.post('/register', authenticateToken, authorizeRoles(['admin']), async (req, 
 // Ruta de inicio de sesión
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
+  console.log(`BACKEND DEBUG: Intento de login recibido - Usuario: ${username}, Contraseña: ${password}`);
 
-  console.log('BACKEND DEBUG: Intento de login recibido - Usuario:', username, ', Contraseña (sin hash): ', password);
+  if (!username || !password) {
+    console.log('BACKEND DEBUG: Faltan credenciales.');
+    return res.status(400).json({ message: 'Se requieren nombre de usuario y contraseña' });
+  }
 
+  const users = readUsers(); // Leer usuarios
   const user = users.find(u => u.username === username);
   if (!user) {
-    console.log('BACKEND DEBUG: Usuario no encontrado:', username);
-    return res.status(400).json({ message: 'Credenciales inválidas' });
+    console.log(`BACKEND DEBUG: Usuario ${username} no encontrado.`);
+    return res.status(401).json({ message: 'Credenciales inválidas' });
   }
 
-  console.log('BACKEND DEBUG: Usuario encontrado:', user.username);
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    console.log('BACKEND DEBUG: Contraseña incorrecta para el usuario:', username);
-    return res.status(400).json({ message: 'Credenciales inválidas' });
+    console.log(`BACKEND DEBUG: Contraseña incorrecta para el usuario ${username}.`);
+    return res.status(401).json({ message: 'Credenciales inválidas' });
   }
 
-  console.log('BACKEND DEBUG: Login exitoso para el usuario:', username);
-  const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign(
+    { id: user.id, username: user.username, role: user.role },
+    JWT_SECRET,
+    { expiresIn: '1h' }
+  );
 
-  res.json({ message: 'Inicio de sesión exitoso', token });
+  console.log(`BACKEND DEBUG: Login exitoso para el usuario ${username}.`);
+  res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
 });
 
 // Ruta para eliminar un usuario (solo accesible por administradores)
 app.delete('/users/:id', authenticateToken, authorizeRoles(['admin']), (req, res) => {
   const userId = parseInt(req.params.id);
-  const userIndex = users.findIndex(u => u.id === userId);
+  let users = readUsers(); // Leer usuarios
 
-  if (userIndex === -1) {
-    return res.status(404).json({ message: 'Usuario no encontrado' });
+  const initialLength = users.length;
+  users = users.filter(user => user.id !== userId);
+
+  if (users.length < initialLength) {
+    writeUsers(users); // Escribir usuarios actualizados
+    res.json({ message: 'Usuario eliminado exitosamente' });
+  } else {
+    res.status(404).json({ message: 'Usuario no encontrado' });
   }
-
-  // No permitir que un admin se elimine a sí mismo (opcional, pero buena práctica)
-  if (users[userIndex].role === 'admin' && users[userIndex].id === req.user.id) {
-    return res.status(403).json({ message: 'No puedes eliminar tu propia cuenta de administrador.' });
-  }
-
-  users.splice(userIndex, 1);
-  res.json({ message: 'Usuario eliminado exitosamente' });
 });
 
 // Ruta para obtener todos los usuarios (solo accesible por administradores)
 app.get('/users', authenticateToken, authorizeRoles(['admin']), (req, res) => {
-  // Evitar enviar la contraseña hasheada al frontend
+  const users = readUsers(); // Leer usuarios
+  // Excluir contraseñas de la respuesta
   const usersWithoutPasswords = users.map(user => {
-    const { password, ...rest } = user;
-    return rest;
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   });
   res.json(usersWithoutPasswords);
 });
