@@ -2,58 +2,162 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const fs = require('fs'); // Import the file system module
 const path = require('path'); // Import path module
+const { Sequelize, DataTypes } = require('sequelize');
+
 const app = express();
 const PORT = process.env.PORT || 3001; // Cambiado a 3001 temporalmente
 
-const novedadesFilePath = path.join(__dirname, 'novedades.json');
-const usersFilePath = path.join(__dirname, 'users.json');
+// Configuración de Sequelize para PostgreSQL
+const sequelize = new Sequelize('postgresql://distrital_4_jefatura_postgres_user:kVxxkk2xSD5PBqblPlGoylfPM93khoa8@dpg-d38quqogjchc73d9cnm0-a/distrital_4_jefatura_postgres', {
+  dialect: 'postgres',
+  protocol: 'postgres',
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false // Para Render.com, esto suele ser necesario
+    }
+  },
+  logging: false // Deshabilita los logs de SQL de Sequelize
+});
 
-// Usuarios en memoria (simulando una base de datos)
-// const users = [
-//   { id: 1, username: 'admin', password: '$2b$10$RUpwExm7ZRkki8L6blId9ev3EYdDzGfXza98mGdZemSICPbUrqC32', role: 'admin' } // Contraseña: hijoteamo2
-// ]; // { username, password, role: 'user' | 'admin' }
+// Test de conexión a la base de datos
+async function connectDB() {
+  try {
+    await sequelize.authenticate();
+    console.log('BACKEND DEBUG: Conexión a la base de datos PostgreSQL establecida exitosamente.');
+  } catch (error) {
+    console.error('BACKEND DEBUG: No se pudo conectar a la base de datos PostgreSQL:', error);
+  }
+}
+
+connectDB();
+
+// Middlewares
+app.use(cors({
+  origin: '*'
+}));
+app.use(express.json());
+
+// Archivos estáticos para el frontend (sirve el build de React/Vue/Angular)
+// app.use(express.static(path.join(__dirname, 'public')));
+
+// Configuración de rutas de archivos para persistencia (eliminado, ahora usaremos DB)
+// const novedadesFilePath = path.join(__dirname, 'novedades.json');
+// const usersFilePath = path.join(__dirname, 'users.json');
 
 // Clave secreta para JWT (debería ser una variable de entorno en producción)
-const JWT_SECRET = 'supersecretkey'; 
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
-// Funciones auxiliares para leer y escribir novedades
-function readNovedades() {
-  if (fs.existsSync(novedadesFilePath)) {
-    const data = fs.readFileSync(novedadesFilePath, 'utf8');
-    return JSON.parse(data);
-  } 
-  return [];
-}
+// Definición del modelo User
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  role: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'user',
+  },
+}, {
+  // Opciones del modelo
+  timestamps: false, // No queremos createdAt y updatedAt
+});
 
-function writeNovedades(novedades) {
-  fs.writeFileSync(novedadesFilePath, JSON.stringify(novedades, null, 2), 'utf8');
-}
+// Definición del modelo Novedad
+const Novedad = sequelize.define('Novedad', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  fechaDelHecho: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  horaDelHecho: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  calle: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  altura: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  entreCalles: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  barrio: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  circunscripcion: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  coordenadas: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  encuadreLegal: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  victima: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  edadVictima: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  generoVictima: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  observaciones: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+}, {
+  timestamps: false,
+});
 
-// Funciones auxiliares para leer y escribir usuarios
-function readUsers() {
-  console.log('BACKEND DEBUG: Intentando leer usuarios de:', usersFilePath);
-  if (fs.existsSync(usersFilePath)) {
-    const data = fs.readFileSync(usersFilePath, 'utf8');
-    const users = JSON.parse(data);
-    console.log('BACKEND DEBUG: Usuarios leídos (después de parsear): ', users.map(u => u.username));
-    return users;
+// Sincronizar modelos con la base de datos
+async function syncDB() {
+  try {
+    await sequelize.sync({ alter: true }); // `alter: true` intentará hacer cambios no destructivos en el esquema existente
+    console.log('BACKEND DEBUG: Modelos sincronizados con la base de datos.');
+    
+    // Asegurarse de que el usuario admin exista
+    const adminUser = await User.findOne({ where: { username: 'admin' } });
+    if (!adminUser) {
+      const hashedPassword = await bcrypt.hash('hijoteamo2', 10); // Contraseña por defecto
+      await User.create({ id: 1, username: 'admin', password: hashedPassword, role: 'admin' });
+      console.log('BACKEND DEBUG: Usuario admin creado si no existía.');
+    }
+
+  } catch (error) {
+    console.error('BACKEND DEBUG: Error al sincronizar modelos o crear admin:', error);
   }
-  console.log('BACKEND DEBUG: El archivo de usuarios no existe, inicializando con usuario admin.');
-  const initialUsers = [
-    { id: 1, username: 'admin', password: '$2b$10$RUpwExm7ZRkki8L6blId9ev3EYdDzGfXza98mGdZemSICPbUrqC32', role: 'admin' } // Contraseña: hijoteamo2
-  ];
-  writeUsers(initialUsers);
-  return initialUsers;
 }
 
-function writeUsers(users) {
-  console.log('BACKEND DEBUG: Intentando escribir usuarios en:', usersFilePath);
-  console.log('BACKEND DEBUG: Usuarios a escribir:', users.map(u => u.username));
-  fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2), 'utf8');
-  console.log('BACKEND DEBUG: Usuarios escritos exitosamente.');
-}
+syncDB();
 
 // Middleware para autenticación JWT
 function authenticateToken(req, res, next) {
@@ -79,55 +183,67 @@ function authorizeRoles(roles) {
   };
 }
 
-app.use(cors());
-app.use(express.json());
-
 // Rutas API para Novedades
 // Obtener todas las novedades
-app.get('/novedades', authenticateToken, (req, res) => {
-  const novedades = readNovedades();
-  res.json(novedades);
+app.get('/novedades', authenticateToken, async (req, res) => {
+  try {
+    const novedades = await Novedad.findAll();
+    res.json(novedades);
+  } catch (error) {
+    console.error('BACKEND DEBUG: Error al obtener novedades:', error);
+    res.status(500).json({ message: 'Error interno del servidor al obtener novedades' });
+  }
 });
 
 // Guardar una nueva novedad
-app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), (req, res) => {
-  const newNovedad = req.body;
-  const novedades = readNovedades();
-  newNovedad.id = Date.now().toString(); // Asignar un ID único
-  novedades.push(newNovedad);
-  writeNovedades(novedades);
-  res.status(201).json(newNovedad);
+app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), async (req, res) => {
+  const newNovedadData = req.body;
+  try {
+    const newNovedad = await Novedad.create(newNovedadData);
+    res.status(201).json(newNovedad);
+  } catch (error) {
+    console.error('BACKEND DEBUG: Error al guardar nueva novedad:', error);
+    res.status(500).json({ message: 'Error interno del servidor al guardar novedad' });
+  }
 });
 
 // Actualizar una novedad existente
-app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), (req, res) => {
+app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), async (req, res) => {
   const novedadId = req.params.id;
-  const updatedNovedad = req.body;
-  let novedades = readNovedades();
-  
-  const index = novedades.findIndex(n => n.id === novedadId);
-  if (index !== -1) {
-    novedades[index] = { ...novedades[index], ...updatedNovedad, id: novedadId }; // Asegurar que el ID no cambie
-    writeNovedades(novedades);
-    res.json(novedades[index]);
-  } else {
-    res.status(404).json({ message: 'Novedad no encontrada' });
+  const updatedNovedadData = req.body;
+
+  try {
+    const [updatedRowsCount, updatedNovedades] = await Novedad.update(updatedNovedadData, {
+      where: { id: novedadId },
+      returning: true, // Esto es para PostgreSQL, devuelve las filas actualizadas
+    });
+
+    if (updatedRowsCount > 0) {
+      res.json(updatedNovedades[0]); // Devuelve la primera (y única) novedad actualizada
+    } else {
+      res.status(404).json({ message: 'Novedad no encontrada' });
+    }
+  } catch (error) {
+    console.error('BACKEND DEBUG: Error al actualizar novedad:', error);
+    res.status(500).json({ message: 'Error interno del servidor al actualizar novedad' });
   }
 });
 
 // Eliminar una novedad
-app.delete('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), (req, res) => {
+app.delete('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), async (req, res) => {
   const novedadId = req.params.id;
-  let novedades = readNovedades();
 
-  const initialLength = novedades.length;
-  novedades = novedades.filter(n => n.id !== novedadId);
-  
-  if (novedades.length < initialLength) {
-    writeNovedades(novedades);
-    res.json({ message: 'Novedad eliminada exitosamente' });
-  } else {
-    res.status(404).json({ message: 'Novedad no encontrada' });
+  try {
+    const deletedRowCount = await Novedad.destroy({ where: { id: novedadId } });
+
+    if (deletedRowCount > 0) {
+      res.json({ message: 'Novedad eliminada exitosamente' });
+    } else {
+      res.status(404).json({ message: 'Novedad no encontrada' });
+    }
+  } catch (error) {
+    console.error('BACKEND DEBUG: Error al eliminar novedad:', error);
+    res.status(500).json({ message: 'Error interno del servidor al eliminar novedad' });
   }
 });
 
@@ -139,20 +255,22 @@ app.post('/register', authenticateToken, authorizeRoles(['admin']), async (req, 
     return res.status(400).json({ message: 'Se requieren nombre de usuario y contraseña' });
   }
 
-  const users = readUsers(); // Leer usuarios
-  const existingUser = users.find(u => u.username === username);
-  if (existingUser) {
-    return res.status(400).json({ message: 'El nombre de usuario ya existe' });
+  try {
+    const existingUser = await User.findOne({ where: { username: username } });
+    if (existingUser) {
+      return res.status(400).json({ message: 'El nombre de usuario ya existe' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({ username, password: hashedPassword, role: role || 'user' });
+
+    console.log('BACKEND DEBUG: Usuario registrado exitosamente en DB:', newUser.username);
+
+    res.status(201).json({ message: 'Usuario registrado exitosamente', user: { id: newUser.id, username: newUser.username, role: newUser.role } });
+  } catch (error) {
+    console.error('BACKEND DEBUG: Error al registrar usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor al registrar usuario' });
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  // El rol ahora puede ser especificado por el admin, si no, por defecto 'user'
-  const newUser = { id: users.length + 1, username, password: hashedPassword, role: role || 'user' }; 
-  users.push(newUser);
-  writeUsers(users); // Escribir usuarios actualizados
-  console.log('BACKEND DEBUG: Estado de usuarios después del registro:', users.map(u => u.username));
-
-  res.status(201).json({ message: 'Usuario registrado exitosamente', user: { id: newUser.id, username: newUser.username, role: newUser.role } });
 });
 
 // Ruta de inicio de sesión
@@ -165,55 +283,60 @@ app.post('/login', async (req, res) => {
     return res.status(400).json({ message: 'Se requieren nombre de usuario y contraseña' });
   }
 
-  const users = readUsers(); // Leer usuarios
-  console.log('BACKEND DEBUG: Usuarios cargados para login:', users.map(u => u.username));
-  const user = users.find(u => u.username === username);
-  if (!user) {
-    console.log(`BACKEND DEBUG: Usuario ${username} no encontrado.`);
-    return res.status(401).json({ message: 'Credenciales inválidas' });
+  try {
+    const user = await User.findOne({ where: { username: username } });
+    if (!user) {
+      console.log(`BACKEND DEBUG: Usuario ${username} no encontrado en DB.`);
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      console.log(`BACKEND DEBUG: Contraseña incorrecta para el usuario ${username}.`);
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, username: user.username, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    console.log(`BACKEND DEBUG: Login exitoso para el usuario ${username}.`);
+    res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+  } catch (error) {
+    console.error('BACKEND DEBUG: Error al iniciar sesión:', error);
+    res.status(500).json({ message: 'Error interno del servidor al iniciar sesión' });
   }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    console.log(`BACKEND DEBUG: Contraseña incorrecta para el usuario ${username}.`);
-    return res.status(401).json({ message: 'Credenciales inválidas' });
-  }
-
-  const token = jwt.sign(
-    { id: user.id, username: user.username, role: user.role },
-    JWT_SECRET,
-    { expiresIn: '1h' }
-  );
-
-  console.log(`BACKEND DEBUG: Login exitoso para el usuario ${username}.`);
-  res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
 });
 
 // Ruta para eliminar un usuario (solo accesible por administradores)
-app.delete('/users/:id', authenticateToken, authorizeRoles(['admin']), (req, res) => {
-  const userId = parseInt(req.params.id);
-  let users = readUsers(); // Leer usuarios
+app.delete('/users/:id', authenticateToken, authorizeRoles(['admin']), async (req, res) => {
+  const userId = req.params.id; // Sequelize manejará la conversión de tipo si el ID es un INTEGER
 
-  const initialLength = users.length;
-  users = users.filter(user => user.id !== userId);
+  try {
+    const deletedRowCount = await User.destroy({ where: { id: userId } });
 
-  if (users.length < initialLength) {
-    writeUsers(users); // Escribir usuarios actualizados
-    res.json({ message: 'Usuario eliminado exitosamente' });
-  } else {
-    res.status(404).json({ message: 'Usuario no encontrado' });
+    if (deletedRowCount > 0) {
+      res.json({ message: 'Usuario eliminado exitosamente' });
+    } else {
+      res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+  } catch (error) {
+    console.error('BACKEND DEBUG: Error al eliminar usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor al eliminar usuario' });
   }
 });
 
 // Ruta para obtener todos los usuarios (solo accesible por administradores)
-app.get('/users', authenticateToken, authorizeRoles(['admin']), (req, res) => {
-  const users = readUsers(); // Leer usuarios
-  // Excluir contraseñas de la respuesta
-  const usersWithoutPasswords = users.map(user => {
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
-  });
-  res.json(usersWithoutPasswords);
+app.get('/users', authenticateToken, authorizeRoles(['admin']), async (req, res) => {
+  try {
+    const users = await User.findAll({ attributes: { exclude: ['password'] } }); // Excluir contraseñas
+    res.json(users);
+  } catch (error) {
+    console.error('BACKEND DEBUG: Error al obtener usuarios:', error);
+    res.status(500).json({ message: 'Error interno del servidor al obtener usuarios' });
+  }
 });
 
 // Ruta protegida de ejemplo (solo para administradores)
