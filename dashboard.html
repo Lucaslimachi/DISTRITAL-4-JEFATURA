@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>DISTRITAL 4 - JEFATURA</h1>
+        <p id="welcomeMessage"></p>
+        <div class="dashboard-buttons">
+            <button id="novedadesParteBtn" onclick="window.location.href='novedades_parte.html'">PARTE DE NOVEDADES</button>
+            <button id="verNovedadesBtn" onclick="window.location.href='ver_novedades.html'">VER PARTES DE NOVEDADES</button>
+            <button id="mapaDelictualBtn" onclick="window.location.href='mapa_delictual.html'">MAPA DELICTUAL</button>
+            <button id="estadisticasBtn" onclick="window.location.href='estadisticas.html'">ESTADISTICAS</button>
+            <button id="registerUserDashboardBtn">REGISTRAR USUARIO</button>
+            <button id="viewUsersBtn">VER USUARIOS</button>
+        </div>
+        <button id="logoutBtn">Cerrar Sesión</button>
+    </div>
+
+    <!-- The Modal (moved from index.html) -->
+    <div id="registerModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Registrar Nuevo Usuario</h2>
+            <form id="registerForm">
+                <div class="input-group">
+                    <label for="regName">Nombre:</label>
+                    <input type="text" id="regName" name="regName" required>
+                </div>
+                <div class="input-group">
+                    <label for="regLastName">Apellido:</label>
+                    <input type="text" id="regLastName" name="regLastName" required>
+                </div>
+                <div class="input-group">
+                    <label for="regPhone">Teléfono:</label>
+                    <input type="tel" id="regPhone" name="regPhone">
+                </div>
+                <div class="input-group">
+                    <label for="regHierarchy">Jerarquía:</label>
+                    <input type="text" id="regHierarchy" name="regHierarchy">
+                </div>
+                <div class="input-group">
+                    <label for="regRole">Rol:</label>
+                    <select id="regRole" name="regRole">
+                        <option value="user">Invitado</option>
+                        <option value="admin">Administrador</option>
+                        <option value="user-oficiales">Usuario-Oficiales</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="regUsername">Nombre de Usuario:</label>
+                    <input type="text" id="regUsername" name="regUsername" required>
+                </div>
+                <div class="input-group">
+                    <label for="regPassword">Contraseña:</label>
+                    <input type="password" id="regPassword" name="regPassword" required>
+                </div>
+                <div class="input-group">
+                    <label for="regConfirmPassword">Confirmar Contraseña:</label>
+                    <input type="password" id="regConfirmPassword" name="regConfirmPassword" required>
+                </div>
+                <button type="submit">Registrar</button>
+                <button type="button" id="backToDashboardBtn">Volver</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para ver usuarios -->
+    <div id="usersModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeUsersModal">&times;</span>
+            <h2>Usuarios Registrados</h2>
+            <div id="usersList"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loggedInUsername = localStorage.getItem('loggedInUsername');
+            const userRole = localStorage.getItem('userRole');
+            const jwtToken = localStorage.getItem('jwtToken');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const novedadesParteBtn = document.getElementById('novedadesParteBtn');
+            const verNovedadesBtn = document.getElementById('verNovedadesBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const registerUserDashboardBtn = document.getElementById('registerUserDashboardBtn');
+            const viewUsersBtn = document.getElementById('viewUsersBtn');
+            const mapaDelictualBtn = document.getElementById('mapaDelictualBtn');
+            const estadisticasBtn = document.getElementById('estadisticasBtn');
+
+            // Modal elements
+            var modal = document.getElementById("registerModal");
+            var span = document.getElementsByClassName("close")[0];
+            var backToDashboardBtn = document.getElementById("backToDashboardBtn");
+
+            // Registration form elements
+            var registerForm = document.getElementById("registerForm");
+            var regPassword = document.getElementById("regPassword");
+            var regConfirmPassword = document.getElementById("regConfirmPassword");
+            var regRole = document.getElementById("regRole");
+
+            // Users modal elements
+            var usersModal = document.getElementById("usersModal");
+            var closeUsersModal = document.getElementById("closeUsersModal");
+            var usersList = document.getElementById("usersList");
+
+            // Obtener el ID del usuario logueado del localStorage (almacenado durante el login)
+            const loggedInUserId = localStorage.getItem('loggedInUserId'); // Necesitamos almacenar esto en el login
+
+            if (!jwtToken) {
+                window.location.href = 'index.html'; // Redirigir si no hay token
+                return;
+            }
+
+            if (loggedInUsername) {
+                welcomeMessage.textContent = `Bienvenido, ${loggedInUsername} (${userRole}).`;
+            } else {
+                welcomeMessage.textContent = 'Has iniciado sesión o te has registrado con éxito.';
+            }
+
+            // Control de visibilidad de botones según el rol
+            if (userRole === 'admin') {
+                novedadesParteBtn.style.display = 'block';
+                verNovedadesBtn.style.display = 'block';
+                registerUserDashboardBtn.style.display = 'block'; // Mostrar botón de registro para admin
+                viewUsersBtn.style.display = 'block'; // Mostrar botón de ver usuarios para admin
+                mapaDelictualBtn.style.display = 'block'; // Mostrar para admin
+                estadisticasBtn.style.display = 'block'; // Mostrar para admin
+            } else if (userRole === 'user-oficiales') { // Nuevo rol
+                novedadesParteBtn.style.display = 'block';
+                verNovedadesBtn.style.display = 'block';
+                registerUserDashboardBtn.style.display = 'none'; // Ocultar para oficiales
+                viewUsersBtn.style.display = 'none'; // Ocultar para oficiales
+                estadisticasBtn.style.display = 'none'; // Ocultar para oficiales
+            } else if (userRole === 'user') { // Rol Invitado
+                novedadesParteBtn.style.display = 'none';
+                verNovedadesBtn.style.display = 'none';
+                registerUserDashboardBtn.style.display = 'none';
+                viewUsersBtn.style.display = 'none';
+                mapaDelictualBtn.style.display = 'block'; // Mostrar solo Mapa Delictual para Invitados
+                estadisticasBtn.style.display = 'none';
+            } else {
+                novedadesParteBtn.style.display = 'none';
+                verNovedadesBtn.style.display = 'none';
+                registerUserDashboardBtn.style.display = 'none'; // Ocultar para no admin ni oficiales
+                viewUsersBtn.style.display = 'none'; // Ocultar para no admin ni oficiales
+                mapaDelictualBtn.style.display = 'none'; // Ocultar por defecto
+                estadisticasBtn.style.display = 'none'; // Ocultar por defecto
+            }
+
+            // Manejar el logout
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('loggedInUsername');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('loggedInUserId'); // Eliminar también la ID del usuario
+                window.location.href = 'index.html'; // Redirigir a la página de login
+            });
+
+            // Lógica del modal de registro
+            if (registerUserDashboardBtn) {
+                registerUserDashboardBtn.onclick = function() {
+                    modal.style.display = "flex"; // Usar flex para centrar el modal
+                }
+            }
+
+            if (span) {
+                span.onclick = function() {
+                    modal.style.display = "none";
+                }
+            }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                } else if (event.target == usersModal) { // Cerrar modal de usuarios también
+                    usersModal.style.display = "none";
+                }
+            }
+
+            if (backToDashboardBtn) {
+                backToDashboardBtn.onclick = function() {
+                    modal.style.display = "none";
+                }
+            }
+
+            // Lógica de envío del formulario de registro
+            registerForm.onsubmit = async function(event) {
+                event.preventDefault(); // Evitar el envío del formulario por defecto
+
+                if (regPassword.value !== regConfirmPassword.value) {
+                    alert("Las contraseñas no coinciden.");
+                    return;
+                }
+
+                // El token del admin ya debe estar en localStorage
+                const adminToken = localStorage.getItem('jwtToken');
+                if (!adminToken) {
+                    alert('Error: Token de administrador no encontrado.');
+                    return;
+                }
+
+                const username = document.getElementById('regUsername').value;
+                const password = regPassword.value;
+                const role = regRole.value;
+
+                try {
+                    const response = await fetch('http://localhost:3001/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${adminToken}`
+                        },
+                        body: JSON.stringify({ username, password, role })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert(data.message);
+                        modal.style.display = 'none'; // Cerrar modal
+                        registerForm.reset(); // Limpiar formulario
+                        // Opcional: recargar la lista de usuarios si el modal está abierto
+                        if (usersModal.style.display === 'flex') {
+                            fetchUsers(); 
+                        }
+                    } else {
+                        alert(data.message || 'Error al registrar usuario.');
+                    }
+                } catch (error) {
+                    console.error('Error de red o del servidor:', error);
+                    alert('Error de conexión con el servidor.');
+                }
+            };
+
+            // Función para obtener y mostrar usuarios
+            async function fetchUsers() {
+                const adminToken = localStorage.getItem('jwtToken');
+                if (!adminToken) {
+                    alert('Error: Token de administrador no encontrado. No se pueden cargar usuarios.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:3001/users', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`
+                        }
+                    });
+
+                    const usersData = await response.json();
+
+                    if (response.ok) {
+                        usersList.innerHTML = ''; // Limpiar lista anterior
+                        if (usersData.length === 0) {
+                            usersList.innerHTML = '<p>No hay usuarios registrados.</p>';
+                            return;
+                        }
+                        const ul = document.createElement('ul');
+                        usersData.forEach(user => {
+                            const li = document.createElement('li');
+                            // Corregir: Usar loggedInUserId del localStorage para la comparación
+                            li.innerHTML = `ID: ${user.id}, Usuario: ${user.username}, Rol: ${user.role}`;
+                            
+                            // Añadir botón de eliminar para administradores
+                            if (userRole === 'admin' && user.id !== parseInt(loggedInUserId)) {
+                                const deleteBtn = document.createElement('button');
+                                deleteBtn.textContent = 'Eliminar';
+                                deleteBtn.classList.add('delete-user-btn');
+                                deleteBtn.onclick = async () => {
+                                    if (confirm(`¿Estás seguro de que quieres eliminar a ${user.username}?`)) {
+                                        await deleteUser(user.id); 
+                                    }
+                                };
+                                li.appendChild(deleteBtn);
+                            }
+                            ul.appendChild(li);
+                        });
+                        usersList.appendChild(ul);
+                    } else {
+                        alert(usersData.message || 'Error al cargar usuarios.');
+                    }
+                } catch (error) {
+                    console.error('Error de red o del servidor al cargar usuarios:', error);
+                    alert('Error de conexión con el servidor al cargar usuarios.');
+                }
+            }
+
+            // Función para eliminar un usuario
+            async function deleteUser(userId) {
+                const adminToken = localStorage.getItem('jwtToken');
+                if (!adminToken) {
+                    alert('Error: Token de administrador no encontrado. No se puede eliminar usuarios.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`http://localhost:3001/users/${userId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${adminToken}`
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert(data.message);
+                        fetchUsers(); // Recargar la lista de usuarios
+                    } else {
+                        alert(data.message || 'Error al eliminar usuario.');
+                    }
+                } catch (error) {
+                    console.error('Error de red o del servidor al eliminar usuario:', error);
+                    alert('Error de conexión con el servidor al eliminar usuario.');
+                }
+            }
+
+            // Lógica del modal para ver usuarios
+            if (viewUsersBtn) {
+                viewUsersBtn.onclick = async function() {
+                    await fetchUsers(); // Cargar usuarios antes de mostrar el modal
+                    usersModal.style.display = "flex";
+                }
+            }
+
+            if (closeUsersModal) {
+                closeUsersModal.onclick = function() {
+                    usersModal.style.display = "none";
+                }
+            }
+        });
+    </script>
+</body>
+</html>

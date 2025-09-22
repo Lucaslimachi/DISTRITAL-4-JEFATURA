@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parte de Novedades</title>
+    <link rel="stylesheet" href="novedades_parte.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Parte de Novedades</h1>
+        <form>
+            <div class="input-group">
+                <label for="sumario">SUMARIO:</label>
+                <input type="text" id="sumario" name="sumario" required>
+            </div>
+            <div class="input-group">
+                <label for="expediente">EXPEDIENTE:</label>
+                <input type="text" id="expediente" name="expediente" required list="expedientePrefixes" autocomplete="off">
+                <datalist id="expedientePrefixes">
+                    <option value="P-">
+                    <option value="T-">
+                </datalist>
+            </div>
+            <div class="input-group">
+                <label for="departamento">DEPARTAMENTO:</label>
+                <select id="departamento" name="departamento" required>
+                    <option value="">Seleccione un departamento</option>
+                    <option value="departamental_tupungato">DEPARTAMENTAL TUPUNGATO</option>
+                    <option value="departamental_tunuyan">DEPARTAMENTAL TUNUYAN</option>
+                    <option value="departamental_san_carlos">DEPARTAMENTAL SAN CARLOS</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="dependencia">DEPENDENCIA:</label>
+                <select id="dependencia" name="dependencia" required>
+                    <option value="">Seleccione una dependencia</option>
+                    <option value="comisaria_15">COMISARIA 15</option>
+                    <option value="comisaria_18">COMISARIA 18</option>
+                    <option value="comisaria_20">COMISARIA 20</option>
+                    <option value="comisaria_41">COMISARIA 41</option>
+                    <option value="comisaria_65">COMISARIA 65</option>
+                    <option value="subcomisaria_cordon_del_plata">SUBCOMISARIA CORDON DEL PLATA</option>
+                    <option value="subcomisaria_san_jose">SUBCOMISARIA SAN JOSE</option>
+                    <option value="subcomisaria_el_manzano">SUBCOMISARIA EL MANZANO</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="encuadreLegal">ENCUADRE LEGAL:</label>
+                <input list="encuadreLegalOptions" id="encuadreLegal" name="encuadreLegal" required>
+                <datalist id="encuadreLegalOptions">
+                    <option value="ROBO">
+                    <option value="ROBO AGRAVADO">
+                    <option value="ROBO EN GRADO DE TENTATIVA">
+                    <option value="HURTO">
+                    <option value="HURTO AGRAVADO">
+                    <option value="HURTO EN GRADO DE TENTATIVA">
+                    <option value="VIOLENCIADE GENERO">
+                    <option value="HECHO">
+                    <option value="DAÑO">
+                    <option value="INCENDIO">
+                    <option value="USURPACION">
+                    <option value="LESIONES">
+                    <option value="LESIONES LEVES">
+                    <option value="LESIONES GRAVES">
+                    <option value="LESIONES EN ACCIDENTE">
+                    <option value="LEY 9099 (CONTRAVENCIONAL)">
+                    <option value="HOMICIDIO">
+                    <option value="HOMICIDIO CULPOSO">
+                    <option value="ENCUBRIMIENTO">
+                    <option value="MUERTE (S.A.M.)">
+                    <option value="LESIONES CULPOSAS">
+                    <option value="ABIGEATO">
+                    <option value="AMENAZAS">
+                    <option value="ESTAFA">
+                    <option value="IMPEDIMENTO DE CONTACTO">
+                    <option value="TENENCIA DE ARMA">
+                    <option value="PARADERO">
+                    <option value="PRIVACION ILEGITIMA DE LA LIBERTAD">
+                    <option value="VEJACIONES">
+                    <option value="AYUDA O INSTIGACION AL SUICIDIO">
+                    <option value="ABUSO SEXUAL">
+                    <option value="DESOBEDIENCIA A UNA ORDEN JUDICIAL">
+                    <option value="INFRACCION LEY DE FAUNA">
+                    <option value="PROCEDENCIA">
+                    <option value="LESIONES CULPOSAS GRAVES">
+                    <option value="ROBO AGRAVADO EN GRADO DE TENTATIVA">
+                    <option value="VIOLACION DE DOMICILIO">
+                    <option value="MEDIDAS PENDIENTES">
+                    <option value="AGRESION CON TODA ARMA">
+                    <option value="INCUMPLIMIENTO DE LOS DEBERES DE ASISTENCIA FAMILIAR">
+                    <option value="RESISTENCIA A LA AUTORIDAD">
+                    <option value="TENTATIVA DE ESTAFA">
+                    <option value="FALTA AL REGIMEN DISCIPLINARIO POLICIAL">
+                    <option value="COACCION">
+                    <option value="DELITOS CONTRA LA FE PUBLICA">
+                    <option value="ABUSO DE ARMA">
+                    <option value="INCUMPLIMIENTO DE LOS DEBERES DEL FUNCIONARIO PUBLICO">
+                    <option value="EXTORSION">
+                    <option value="RETENCION INDEBIDA">
+                    <option value="HALLAZGO">
+                    <option value="EVASION">
+                    <option value="EXHIBICIONES OBSCENAS">
+                    <option value="MUERTE">
+                    <option value="COMPLEMENTARIA">
+                    <option value="CALUMNIAS">
+                    <option value="DELITOS CONTRA LA PROPIEDAD INTELECTUAL">
+                    <option value="HOMICIDIO EN GRADO DE TENTATIVA">
+                    <option value="ABANDONO DE PERSONA">
+                    <option value="GROOMING">
+                    <option value="DEFRAUDACION MENOR POR APROPIACION DE COSA PERDIDA">
+                    <option value="LEY 14346">
+                    <option value="LESIONES LEVES AGRAVADAS POR EL VINCULO">
+                    <option value="FALSIFICACION DE DOCUMENTO PUBLICO">
+                    <option value="CAPTURA">
+                    <option value="DAÑO AGRAVADO">
+                    <option value="MALTRATO ANIMAL">
+                    <option value="ABUSO DE AUTORIDAD">
+                    <option value="LESIONES CULPOSAS">
+                    <option value="SUSTRACCION RETENCION U OCULTAMIENTO DE MENORES">
+                    <option value="VIOLACION DE SECRETO">
+                    <option value="TRAFICO DE MEDICAMENTOS O MERCADERIAS PELIGROSAS PARA LA SALUD">
+                </datalist>
+            </div>
+            <div class="input-group">
+                <label for="detallesNovedad">DETALLES DE LA NOVEDAD:</label>
+                <textarea id="detallesNovedad" name="detallesNovedad" rows="3" required></textarea>
+            </div>
+            <div class="input-group">
+                <label for="fecha">FECHA DEL HECHO:</label>
+                <input type="date" id="fecha" name="fecha" required>
+            </div>
+            <div class="input-group">
+                <label for="horaHecho">HORA DEL HECHO:</label>
+                <input type="time" id="horaHecho" name="horaHecho" required>
+            </div>
+            
+            <!-- Nuevo contenedor para diseño de dos columnas -->
+            <div class="layout-row">
+                <div class="input-group map-group">
+                    <label>UBICACION (seleccione en el mapa):</label>
+                    <div id="map"></div>
+                    <div class="coords-display">
+                        <div>
+                            <label for="latitud">Latitud:</label>
+                            <input type="text" id="latitud" name="latitud" readonly>
+                        </div>
+                        <div>
+                            <label for="longitud">Longitud:</label>
+                            <input type="text" id="longitud" name="longitud" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Columna derecha para Intervalo de Tiempo y Lugar -->
+                <div class="right-column">
+                    <div class="input-group lugar-group">
+                        <label for="lugar">LUGAR:</label>
+                        <select id="lugar" name="lugar" required>
+                            <option value="">Seleccione un lugar</option>
+                            <option value="vivienda">VIVIENDA</option>
+                            <option value="finca">FINCA</option>
+                            <option value="entidad_privada">ENTIDAD PRIVADA</option>
+                            <option value="entidad_publica">ENTIDAD PUBLICA</option>
+                            <option value="via_publica">VIA PUBLICA</option>
+                            <option value="comercio">COMERCIO</option>
+                            <option value="escuela">ESCUELA</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="bienAfectado">BIEN AFECTADO:</label>
+                <input type="text" id="bienAfectado" name="bienAfectado">
+            </div>
+            <div class="input-group">
+                <label for="victima">DATOS DE LA VICTIMA:</label>
+                <input type="text" id="victima" name="victima">
+            </div>
+            <div class="input-group">
+                <label for="nombreImputado">DATOS DEL IMPUTADO:</label>
+                <input type="text" id="nombreImputado" name="nombreImputado">
+            </div>
+            <div class="input-group">
+                <label for="esclarecidos">ESTADO/SITUACION:</label>
+                <select id="esclarecidos" name="esclarecidos" required>
+                    <option value="">Seleccione una opción</option>
+                    <option value="detenido">DETENIDO</option>
+                    <option value="aprehendido">APREHENDIDO</option>
+                    <option value="sindicado">SINDICADO</option>
+                    <option value="no_resulta">NO RESULTA</option>
+                </select>
+            </div>
+            <button type="submit" id="guardarNovedadBtn">Guardar Novedad</button>
+            <button type="button" onclick="window.history.back()">Volver a la página anterior</button>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3001'; // Define the API base URL
+
+        // Script para autocompletar fecha y hora al guardar (ya existente)
+        document.querySelector('.form-container form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const fechaInput = document.getElementById('fecha');
+
+            const now = new Date();
+
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            // Eliminada la línea que autocompletaba la fecha con la actual
+
+            // Obtener fecha y hora de carga actual
+            const fechaCarga = `${year}-${month}-${day}`;
+            const horaCarga = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+            // Recolectar todos los datos del formulario
+            const formData = {};
+            const formElements = event.target.elements;
+            for (let i = 0; i < formElements.length; i++) {
+                const element = formElements[i];
+                if (element.name && element.type !== 'button') {
+                    if (element.id === 'latitud' || element.id === 'longitud') {
+                        if (element.value) {
+                            formData[element.name] = parseFloat(element.value);
+                        } else {
+                            alert("Por favor, seleccione una ubicación en el mapa.");
+                            return;
+                        }
+                    } else if (element.id === 'horaHecho') { // Capturar horaHecho como horaDelHecho
+                        formData['horaDelHecho'] = element.value;
+                    } else if (element.tagName === 'SELECT') {
+                        formData[element.name] = element.value;
+                    } else {
+                        formData[element.name] = element.value;
+                    }
+                }
+            }
+
+            // Validar que el expediente empiece con 'P-' o 'T-'
+            const expedienteValue = formData.expediente;
+            if (!expedienteValue.startsWith('P-') && !expedienteValue.startsWith('T-')) {
+                alert("El campo EXPEDIENTE debe comenzar con 'P-' o 'T-'.");
+                return; // Detener el guardado/actualización
+            }
+
+            // Asignar fecha y hora de carga al objeto formData
+            formData['fechaCarga'] = fechaCarga;
+            formData['horaCarga'] = horaCarga;
+            formData['id'] = Date.now().toString(); // Asignar un ID único a la novedad
+
+            // Obtener novedades existentes o inicializar un array vacío
+            let novedades = JSON.parse(localStorage.getItem('novedades')) || [];
+
+            const form = event.target;
+            const novedadIdToUpdate = form.dataset.novedadId; // Obtener el ID si estamos en modo edición
+
+            // Validar expediente duplicado solo en modo creación o si el expediente cambia en modo edición
+            const nuevoExpediente = formData.expediente;
+
+            // Obtener el token JWT del localStorage
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                alert('No estás autenticado. Por favor, inicia sesión.');
+                window.location.href = 'index.html'; // Redirigir al login
+                return;
+            }
+
+            const isDuplicate = novedades.some(novedad => 
+                novedad.expediente === nuevoExpediente && novedad.id !== novedadIdToUpdate
+            );
+
+            if (isDuplicate) {
+                alert(`Error: Ya existe un parte de novedad con el expediente "${nuevoExpediente}".`);
+                return; // Detener el guardado/actualización
+            }
+
+            let requestUrl = `${API_BASE_URL}/novedades`;
+            let requestMethod = 'POST';
+            let successMessage = 'Parte de Novedades guardado con éxito!';
+
+            if (novedadIdToUpdate) {
+                // Modo edición: actualizar la novedad existente
+                requestUrl = `${API_BASE_URL}/novedades/${novedadIdToUpdate}`;
+                requestMethod = 'PUT';
+                successMessage = 'Novedad actualizada con éxito!';
+            }
+
+            fetch(requestUrl, {
+                method: requestMethod,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // If response is not OK, parse JSON error message from backend
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Error al guardar la novedad.');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(successMessage);
+                // No necesitamos localStorage.setItem('novedades', JSON.stringify(novedades)); aquí
+                // porque el servidor es el que maneja la persistencia.
+
+                const guardarBtn = document.getElementById('guardarNovedadBtn');
+                guardarBtn.disabled = true;
+                guardarBtn.textContent = 'GUARDADO';
+                guardarBtn.style.backgroundColor = '#cccccc'; // Color gris
+
+                // Vaciar todos los campos del formulario
+                event.target.reset(); // Esto vacía la mayoría de los campos
+
+                // Vaciar campos específicos que reset() podría no manejar o que se llenan dinámicamente
+                document.getElementById('latitud').value = '';
+                document.getElementById('longitud').value = '';
+                if (marker) {
+                    map.removeLayer(marker);
+                    marker = null; // Reiniciar el marcador
+                }
+
+                // Restablecer el botón para permitir una nueva novedad (o volver a "Guardar Novedad" si se editó)
+                setTimeout(() => {
+                    guardarBtn.disabled = false;
+                    guardarBtn.textContent = 'Guardar Novedad'; // Cambiar de nuevo a Guardar Novedad
+                    guardarBtn.style.backgroundColor = ''; // Restablecer al estilo original
+                    guardarBtn.classList.remove('edit-mode'); // Quitar clase de modo edición
+                    delete form.dataset.novedadId; // Eliminar el ID del dataset del formulario
+                }, 2000); // Pequeño retraso para que el usuario vea el estado "GUARDADO" o "ACTUALIZADO"
+            })
+            .catch(error => {
+                console.error('Error al guardar la novedad:', error);
+                alert(`Error: ${error.message}`);
+            });
+        });
+
+        // Script para el mapa (nuevo)
+        var map = L.map('map').setView([-33.5777777778, -69.0172222222], 12); // Coordenadas de Tunuyán, Mendoza, con un zoom adecuado
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var marker;
+
+        // Función para cargar los datos de una novedad para edición
+        function loadNovedadForEdit(novedadId) {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                alert('No estás autenticado. Por favor, inicia sesión.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            fetch(`${API_BASE_URL}/novedades` , {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Error al cargar la novedad para edición.');
+                    });
+                }
+                return response.json();
+            })
+            .then(novedades => {
+                const novedadToEdit = novedades.find(n => n.id === novedadId);
+                if (novedadToEdit) {
+                    // Rellenar el formulario con los datos de la novedad
+                    for (const key in novedadToEdit) {
+                        const element = document.getElementById(key);
+                        if (element) {
+                            if (element.type === 'date') {
+                                element.value = novedadToEdit[key];
+                            } else if (element.tagName === 'SELECT') {
+                                element.value = novedadToEdit[key];
+                            } else if (key === 'horaDelHecho') { // Capturar horaHecho como horaDelHecho
+                                document.getElementById('horaHecho').value = novedadToEdit[key];
+                            } else if (key === 'nombreImputado') {
+                                document.getElementById('nombreImputado').value = novedadToEdit[key];
+                            } else if (key === 'detallesNovedad') {
+                                document.getElementById('detallesNovedad').value = novedadToEdit[key];
+                            } else {
+                                element.value = novedadToEdit[key];
+                            }
+                        }
+                    }
+
+                    // Manejar latitud y longitud y el marcador del mapa
+                    const latitud = novedadToEdit.latitud;
+                    const longitud = novedadToEdit.longitud;
+                    if (latitud && longitud) {
+                        document.getElementById('latitud').value = latitud.toFixed(4);
+                        document.getElementById('longitud').value = longitud.toFixed(4);
+                        if (marker) {
+                            map.removeLayer(marker);
+                        }
+                        marker = L.marker([latitud, longitud]).addTo(map);
+                        map.setView([latitud, longitud], 12); // Centrar el mapa en la novedad
+                    }
+
+                    // Cambiar el texto del botón y añadir una clase para indicar modo edición
+                    const guardarBtn = document.getElementById('guardarNovedadBtn');
+                    guardarBtn.textContent = 'Actualizar Novedad';
+                    guardarBtn.classList.add('edit-mode');
+
+                    // Guardar el ID de la novedad en un campo oculto o en un atributo del formulario
+                    document.querySelector('form').dataset.novedadId = novedadId;
+                } else {
+                    alert('Novedad no encontrada.');
+                    window.location.href = 'ver_novedades.html';
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar la novedad para edición:', error);
+                alert(`Error: ${error.message}`);
+            });
+        }
+
+        // Al cargar la página, verificar si hay un ID de novedad para editar
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const novedadId = urlParams.get('id');
+            if (novedadId) {
+                loadNovedadForEdit(novedadId);
+            }
+        });
+
+        map.on('click', function(e) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker(e.latlng).addTo(map);
+            document.getElementById('latitud').value = e.latlng.lat.toFixed(4);
+            document.getElementById('longitud').value = e.latlng.lng.toFixed(4);
+        });
+
+        // Añadir el control de geolocalización de Leaflet
+        L.control.locate({
+            position: 'topleft',
+            strings: {
+                title: "Localizar mi ubicación"
+            },
+            locateOptions: {
+                maxZoom: 16
+            },
+            onLocationError: function(err) {
+                alert(err.message);
+            },
+            onLocationOutsideMapBounds: function(lc) {
+                lc.stop();
+                alert("Tu ubicación está fuera del área del mapa actual.");
+            },
+            flyTo: true, // Animación para volar a la ubicación
+            showPopup: false, // No mostrar un popup por defecto
+            drawCircle: false, // No dibujar un círculo de precisión
+            onLocationFound: function(e) {
+                // Al encontrar la ubicación, actualizar los campos de latitud y longitud
+                document.getElementById('latitud').value = e.latitude.toFixed(4);
+                document.getElementById('longitud').value = e.longitude.toFixed(4);
+
+                // También colocar un marcador si no hay uno o actualizar el existente
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+                marker = L.marker(e.latlng).addTo(map);
+            }
+        }).addTo(map);
+    </script>
+</body>
+</html>

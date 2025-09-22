@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Delictual</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mapa_delictual.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="map-delictual-container">
+        <h1>Mapa Delictual de Novedades</h1>
+        <div class="filters-container">
+            
+            <div class="filter-group">
+                <label for="filterDependencia">Dependencia:</label>
+                <select id="filterDependencia" name="filterDependencia">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterLugar">Lugar:</label>
+                <select id="filterLugar" name="filterLugar">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterEncuadreLegal">Encuadre Legal:</label>
+                <input list="filterEncuadreLegalOptions" id="filterEncuadreLegal" name="filterEncuadreLegal">
+                <datalist id="filterEncuadreLegalOptions"></datalist>
+            </div>
+            <div class="filter-group">
+                <label for="filterStartDate">Fecha Inicio:</label>
+                <input type="date" id="filterStartDate">
+            </div>
+            <div class="filter-group">
+                <label for="filterEndDate">Fecha Fin:</label>
+                <input type="date" id="filterEndDate">
+            </div>
+            <div class="filter-group">
+                <label for="filterImputadoMap">Nombre del Imputado:</label>
+                <input type="text" id="filterImputadoMap" placeholder="Filtrar por nombre del imputado">
+            </div>
+            <div class="filter-group">
+                <label for="filterDayTimeInterval">Intervalo del Día:</label>
+                <select id="filterDayTimeInterval">
+                    <option value="">Todos</option>
+                    <option value="madrugada">Madrugada (00:00 - 05:59)</option>
+                    <option value="manana">Mañana (06:00 - 11:59)</option>
+                    <option value="tarde">Tarde (12:00 - 18:59)</option>
+                    <option value="noche">Noche (19:00 - 23:59)</option>
+                </select>
+            </div>
+            <button id="applyMapFiltersBtn">Buscar</button>
+            <button id="clearMapFiltersBtn">Limpiar Filtros</button>
+        </div>
+        <div id="delictualMap"></div>
+        <button onclick="window.history.back()">Volver a la página anterior</button>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3001'; // Define the API base URL
+        let allNovedades = []; // Variable global para almacenar todas las novedades
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const map = L.map('delictualMap').setView([-33.5777777778, -69.0172222222], 12); // Centrado en Tunuyán
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            let markers = L.featureGroup().addTo(map); // Grupo para gestionar los marcadores
+
+            // Referencias a los elementos del DOM de los filtros
+            
+            const filterDependenciaSelect = document.getElementById('filterDependencia');
+            const filterLugarSelect = document.getElementById('filterLugar');
+            const filterEncuadreLegalInput = document.getElementById('filterEncuadreLegal');
+            const filterEncuadreLegalOptionsDatalist = document.getElementById('filterEncuadreLegalOptions');
+            const filterStartDateInput = document.getElementById('filterStartDate');
+            const filterEndDateInput = document.getElementById('filterEndDate');
+            const filterImputadoMapInput = document.getElementById('filterImputadoMap'); // Nuevo filtro
+            const filterDayTimeIntervalSelect = document.getElementById('filterDayTimeInterval'); // Nuevo filtro
+            const applyMapFiltersBtn = document.getElementById('applyMapFiltersBtn');
+            const clearMapFiltersBtn = document.getElementById('clearMapFiltersBtn');
+
+            // Fetch novedades from API
+            function fetchNovedades() {
+                const token = localStorage.getItem('jwtToken');
+                if (!token) {
+                    alert('No estás autenticado. Por favor, inicia sesión.');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                fetch(`${API_BASE_URL}/novedades`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.message || 'Error al cargar las novedades.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    allNovedades = data; // Store fetched data globally
+                    populateFilters(); // Populate filters with fetched data
+                    renderMapMarkers(allNovedades); // Render initial markers
+                })
+                .catch(error => {
+                    console.error('Error al obtener novedades:', error);
+                    alert(`Error: ${error.message}`);
+                });
+            }
+
+            // Initial fetch when DOM is loaded
+            fetchNovedades();
+
+            // Función para popular las opciones de los filtros
+            function populateFilters() {
+                const departamentos = new Set();
+                const dependencias = new Set();
+                const lugares = new Set();
+                const encuadresLegales = new Set();
+
+                allNovedades.forEach(novedad => {
+                    
+                    if (novedad.dependencia) dependencias.add(novedad.dependencia);
+                    if (novedad.lugar) lugares.add(novedad.lugar);
+                    if (novedad.encuadreLegal) encuadresLegales.add(novedad.encuadreLegal);
+                });
+
+                // Llenar select de Departamentos
+                
+                
+                // Llenar select de Dependencias
+                filterDependenciaSelect.innerHTML = '<option value="">Todas</option>';
+                dependencias.forEach(dep => {
+                    const option = document.createElement('option');
+                    option.value = dep;
+                    option.textContent = dep.toUpperCase();
+                    filterDependenciaSelect.appendChild(option);
+                });
+
+                // Llenar select de Lugares
+                filterLugarSelect.innerHTML = '<option value="">Todos</option>';
+                lugares.forEach(lug => {
+                    const option = document.createElement('option');
+                    option.value = lug;
+                    option.textContent = lug.toUpperCase();
+                    filterLugarSelect.appendChild(option);
+                });
+
+                // Llenar datalist de Encuadre Legal
+                filterEncuadreLegalOptionsDatalist.innerHTML = '';
+                encuadresLegales.forEach(enc => {
+                    const option = document.createElement('option');
+                    option.value = enc;
+                    filterEncuadreLegalOptionsDatalist.appendChild(option);
+                });
+
+                // Llenar select de Intervalo del Día
+                // The dayTimeIntervals set was removed, so this loop is no longer needed.
+                // The options for Intervalo del Día are now hardcoded in the HTML.
+            }
+
+            // Función para renderizar marcadores en el mapa
+            function renderMapMarkers(novedadesToRender) {
+                markers.clearLayers(); // Limpiar marcadores existentes
+
+                novedadesToRender.forEach(novedad => {
+                    if (novedad.latitud && novedad.longitud) {
+                        const lat = parseFloat(novedad.latitud);
+                        const lng = parseFloat(novedad.longitud);
+                        const latlng = L.latLng(lat, lng);
+
+                        let popupContent = '<b>Novedad Registrada</b><br>';
+                        for (const key in novedad) {
+                            if (novedad.hasOwnProperty(key)) {
+                                let displayKey = key.replace(/([A-Z])/g, ' $1').toUpperCase();
+                                if (key === 'latitud' || key === 'longitud') {
+                                    displayKey = key.toUpperCase();
+                                } else if (key === 'esclarecidos') {
+                                    displayKey = 'DATOS DEL IMPUTADO';
+                                } else if (key === 'victima') {
+                                    displayKey = 'DATOS DE LA VICTIMA';
+                                } else if (key === 'departamento' || key === 'dependencia' || key === 'lugar' || key === 'encuadreLegal') {
+                                    displayKey = key.toUpperCase();
+                                }
+                                popupContent += `<p><strong>${displayKey}:</strong> ${novedad[key]}</p>`;
+                            }
+                        }
+
+                        L.marker(latlng).addTo(markers)
+                            .bindPopup(popupContent);
+                    }
+                });
+            }
+
+            // Inicializar filtros y mostrar todas las novedades al cargar
+            populateFilters();
+            renderMapMarkers(allNovedades);
+
+            // Evento para aplicar filtros
+            applyMapFiltersBtn.addEventListener('click', function() {
+                
+                const selectedDependencia = filterDependenciaSelect.value;
+                const selectedLugar = filterLugarSelect.value;
+                const selectedEncuadreLegal = filterEncuadreLegalInput.value;
+                const startDate = filterStartDateInput.value;
+                const endDate = filterEndDateInput.value;
+                const filterImputadoMap = filterImputadoMapInput.value.toLowerCase(); // Nuevo filtro
+                const filterDayTimeInterval = filterDayTimeIntervalSelect.value; // Nuevo filtro
+
+                let filteredNovedades = [...allNovedades];
+
+                
+                if (selectedDependencia) {
+                    filteredNovedades = filteredNovedades.filter(novedad => novedad.dependencia === selectedDependencia);
+                }
+                if (selectedLugar) {
+                    filteredNovedades = filteredNovedades.filter(novedad => novedad.lugar === selectedLugar);
+                }
+                if (selectedEncuadreLegal) {
+                    filteredNovedades = filteredNovedades.filter(novedad => novedad.encuadreLegal === selectedEncuadreLegal);
+                }
+
+                // Filtrar por rango de fechas
+                if (startDate) {
+                    filteredNovedades = filteredNovedades.filter(novedad => novedad.fecha >= startDate);
+                }
+                if (endDate) {
+                    filteredNovedades = filteredNovedades.filter(novedad => novedad.fecha <= endDate);
+                }
+
+                // Nuevo filtro por Nombre del Imputado
+                if (filterImputadoMap) {
+                    filteredNovedades = filteredNovedades.filter(novedad => {
+                        // Buscar en novedad.nombreImputado y hacer la comparación insensible a mayúsculas/minúsculas
+                        return novedad.nombreImputado && String(novedad.nombreImputado).toLowerCase().includes(filterImputadoMap);
+                    });
+                }
+
+                // Nuevo filtro por Intervalo del Día
+                if (filterDayTimeInterval) {
+                    filteredNovedades = filteredNovedades.filter(novedad => {
+                        const novedadTime = novedad.horaDelHecho; // Asumiendo que 'horaDelHecho' es el campo relevante
+                        if (!novedadTime) return false;
+
+                        const [hours, minutes] = novedadTime.split(':').map(Number);
+                        const totalMinutes = hours * 60 + minutes;
+
+                        switch (filterDayTimeInterval) {
+                            case 'madrugada':
+                                return totalMinutes >= (0 * 60) && totalMinutes < (6 * 60); // 00:00 - 05:59
+                            case 'manana':
+                                return totalMinutes >= (6 * 60) && totalMinutes < (12 * 60); // 06:00 - 11:59
+                            case 'tarde':
+                                return totalMinutes >= (12 * 60) && totalMinutes < (19 * 60); // 12:00 - 18:59
+                            case 'noche':
+                                return totalMinutes >= (19 * 60) && totalMinutes <= (23 * 60 + 59); // 19:00 - 23:59
+                            default:
+                                return true;
+                        }
+                    });
+                }
+
+                renderMapMarkers(filteredNovedades);
+            });
+
+            // Evento para limpiar filtros
+            clearMapFiltersBtn.addEventListener('click', function() {
+                
+                filterDependenciaSelect.value = '';
+                filterLugarSelect.value = '';
+                filterEncuadreLegalInput.value = '';
+                filterStartDateInput.value = '';
+                filterEndDateInput.value = '';
+                filterImputadoMapInput.value = ''; // Limpiar nuevo filtro
+                filterDayTimeIntervalSelect.value = ''; // Limpiar nuevo filtro
+                renderMapMarkers(allNovedades); // Mostrar todas las novedades de nuevo
+            });
+        });
+    </script>
+</body>
+</html>
