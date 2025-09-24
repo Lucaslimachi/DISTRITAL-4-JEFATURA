@@ -55,6 +55,26 @@
         let allNovedades = []; // Variable global para almacenar todas las novedades
         let currentNovedadesToRender = []; // Variable para almacenar las novedades actuales renderizadas
 
+        const desiredFields = [
+            { key: 'fechaCreacion', label: 'FECHA DE CARGA' },
+            { key: 'horaCarga', label: 'HORA DE CARGA' },
+            { key: 'fechaDelHecho', label: 'FECHA DEL HECHO' },
+            { key: 'horaDelHecho', label: 'HORA DEL HECHO' },
+            { key: 'sumario', label: 'SUMARIO' },
+            { key: 'expediente', label: 'EXPEDIENTE' },
+            { key: 'dependencia', label: 'DEPENDENCIA' },
+            { key: 'encuadreLegal', label: 'ENCUADRE LEGAL' },
+            { key: 'detallesNovedad', label: 'DETALLES DE LA NOVEDAD' },
+            { key: 'calle', label: 'CALLE' },
+            { key: 'barrio', label: 'BARRIO' },
+            { key: 'coordenadas', label: '' }, // Se manejará como Latitud y Longitud
+            { key: 'lugar', label: 'LUGAR' },
+            { key: 'bienAfectado', label: 'BIEN AFECTADO' },
+            { key: 'victima', label: 'DATOS DE LA VICTIMA' },
+            { key: 'nombreImputado', label: 'DATOS DEL IMPUTADO' },
+            { key: 'esclarecidos', label: 'ESTADO/SITUACION' }
+        ];
+
         document.addEventListener('DOMContentLoaded', function() {
             const novedadesListDiv = document.getElementById('novedadesList');
 
@@ -148,25 +168,8 @@
                             novedadCard.classList.add('novedad-card');
                             let cardContent = '';
 
-                            const desiredFields = [
-                                { key: 'fechaCreacion', label: 'FECHA DE CARGA' },
-                                { key: 'horaCarga', label: 'HORA DE CARGA' },
-                                { key: 'fechaDelHecho', label: 'FECHA DEL HECHO' },
-                                { key: 'horaDelHecho', label: 'HORA DEL HECHO' },
-                                { key: 'sumario', label: 'SUMARIO' },
-                                { key: 'expediente', label: 'EXPEDIENTE' },
-                                { key: 'dependencia', label: 'DEPENDENCIA' },
-                                { key: 'encuadreLegal', label: 'ENCUADRE LEGAL' },
-                                { key: 'detallesNovedad', label: 'DETALLES DE LA NOVEDAD' },
-                                { key: 'calle', label: 'CALLE' },
-                                { key: 'barrio', label: 'BARRIO' },
-                                { key: 'coordenadas', label: '' }, // Se manejará como Latitud y Longitud
-                                { key: 'lugar', label: 'LUGAR' },
-                                { key: 'bienAfectado', label: 'BIEN AFECTADO' },
-                                { key: 'victima', label: 'DATOS DE LA VICTIMA' },
-                                { key: 'nombreImputado', label: 'DATOS DEL IMPUTADO' },
-                                { key: 'esclarecidos', label: 'ESTADO/SITUACION' }
-                            ];
+                            // Eliminamos la definición de desiredFields de aquí, ya es global
+                            // const desiredFields = [...]
 
                             desiredFields.forEach(field => {
                                 let displayValue = novedad[field.key];
@@ -316,23 +319,38 @@
                 }
 
                 const wsData = [];
-                const headers = Object.keys(data[0]).map(key => {
-                    let displayKey = key.replace(/([A-Z])/g, ' $1').toUpperCase();
-                    if (key === 'latitud' || key === 'longitud') {
-                        displayKey = key.toUpperCase();
-                    } else if (key === 'esclarecidos') {
-                        displayKey = 'DATOS DEL IMPUTADO';
+                const headers = [];
+
+                // Generar encabezados de columna basándose en desiredFields
+                desiredFields.forEach(field => {
+                    if (field.key === 'coordenadas') {
+                        headers.push('LATITUD');
+                        headers.push('LONGITUD');
+                    } else {
+                        headers.push(field.label);
                     }
-                    return displayKey;
                 });
                 wsData.push(headers);
 
+                // Añadir los datos de cada novedad
                 data.forEach(novedad => {
-                    const row = Object.values(novedad).map(value => {
-                        if (typeof value === 'string') {
-                            return value.toUpperCase();
+                    const row = [];
+                    desiredFields.forEach(field => {
+                        let displayValue = novedad[field.key];
+
+                        if (field.key === 'coordenadas') {
+                            if (displayValue) {
+                                const [lat, lng] = displayValue.split(',');
+                                row.push(parseFloat(lat).toFixed(4));
+                                row.push(parseFloat(lng).toFixed(4));
+                            } else {
+                                row.push('N/A');
+                                row.push('N/A');
+                            }
+                        } else {
+                            const valueToPush = (displayValue !== undefined && displayValue !== null && displayValue !== '') ? String(displayValue).toUpperCase() : 'N/A';
+                            row.push(valueToPush);
                         }
-                        return value;
                     });
                     wsData.push(row);
                 });
@@ -340,7 +358,6 @@
                 const ws = XLSX.utils.aoa_to_sheet(wsData);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, 'Novedades');
-
                 XLSX.writeFile(wb, `${filename}.xlsx`);
             }
 
