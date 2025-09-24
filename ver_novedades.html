@@ -155,7 +155,7 @@
                     // dateSection.innerHTML = `<h2>Fecha: ${fecha}</h2>`; // Eliminado
                     // novedadesListDiv.appendChild(dateSection); // Eliminado
 
-                    const sortedHoras = Object.keys(groupedNovedades[fecha]).sort();
+                    const sortedHoras = Object.keys(groupedNovedades[fecha]).sort().reverse();
 
                     sortedHoras.forEach(hora => {
                         // const timeSection = document.createElement('div'); // Eliminado
