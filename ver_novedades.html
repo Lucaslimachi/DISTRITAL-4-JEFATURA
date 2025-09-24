@@ -156,14 +156,14 @@
                                 { key: 'sumario', label: 'SUMARIO' },
                                 { key: 'dependencia', label: 'DEPENDENCIA' },
                                 { key: 'encuadreLegal', label: 'ENCUADRE LEGAL' },
-                                { key: 'detallesNovedad', label: 'DETALLES DE LA NOVEDAD' }, // Asumo 'detallesNovedad' es el campo correcto
+                                { key: 'detallesNovedad', label: 'DETALLES DE LA NOVEDAD' },
                                 { key: 'calle', label: 'CALLE' },
                                 { key: 'barrio', label: 'BARRIO' },
-                                { key: 'coordenadas', label: 'UBICACION (Lat/Lon)' }, // Manejaremos esto de forma especial
+                                { key: 'coordenadas', label: '' }, // Se manejará como Latitud y Longitud
                                 { key: 'lugar', label: 'LUGAR' },
                                 { key: 'bienAfectado', label: 'BIEN AFECTADO' },
                                 { key: 'victima', label: 'DATOS DE LA VICTIMA' },
-                                { key: 'nombreImputado', label: 'DATOS DEL IMPUTADO' }, // Asumo 'nombreImputado' es el campo correcto
+                                { key: 'nombreImputado', label: 'DATOS DEL IMPUTADO' },
                                 { key: 'esclarecidos', label: 'ESTADO/SITUACION' }
                             ];
 
@@ -175,15 +175,9 @@
                                     const [lat, lng] = displayValue.split(',');
                                     cardContent += `<p><strong>LATITUD:</strong> ${parseFloat(lat).toFixed(4)}</p>`;
                                     cardContent += `<p><strong>LONGITUD:</strong> ${parseFloat(lng).toFixed(4)}</p>`;
-                                    return; // Skip adding the default coordinates line
-                                } else if (field.key === 'esclarecidos' && displayValue) {
-                                    displayValue = String(displayValue).toUpperCase();
-                                } else if (displayValue) {
-                                    displayValue = String(displayValue).toUpperCase();
-                                }
-
-                                if (displayValue !== undefined && displayValue !== null && displayValue !== '') {
-                                    cardContent += `<p><strong>${displayLabel}:</strong> ${displayValue}</p>`;
+                                    // No hay 'return' aquí para permitir que otros campos se procesen si se desea
+                                } else if (displayValue !== undefined && displayValue !== null && displayValue !== '') {
+                                    cardContent += `<p><strong>${displayLabel}:</strong> ${String(displayValue).toUpperCase()}</p>`;
                                 }
                             });
                             novedadCard.innerHTML = cardContent;
