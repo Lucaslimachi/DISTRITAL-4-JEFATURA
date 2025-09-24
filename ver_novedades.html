@@ -105,8 +105,8 @@
             }
 
             function renderNovedades(novedadesToRender) {
-                currentNovedadesToRender = novedadesToRender; // Actualizar la variable global
-                novedadesListDiv.innerHTML = ''; // Limpiar la lista actual
+                currentNovedadesToRender = novedadesToRender;
+                novedadesListDiv.innerHTML = '';
 
                 if (novedadesToRender.length === 0) {
                     novedadesListDiv.innerHTML = '<p>No hay partes de novedades para mostrar con los filtros aplicados.</p>';
@@ -148,34 +148,44 @@
                             novedadCard.classList.add('novedad-card');
                             let cardContent = '';
 
-                            cardContent += `<p><strong>FECHA DEL HECHO:</strong> ${novedad.fechaDelHecho || 'N/A'}</p>`;
-                            cardContent += `<p><strong>HORA DEL HECHO:</strong> ${novedad.horaDelHecho || 'N/A'}</p>`;
-                            cardContent += `<p><strong>FECHA DE CARGA:</strong> ${novedad.fechaCarga || 'N/A'}</p>`;
-                            cardContent += `<p><strong>HORA DE CARGA:</strong> ${novedad.horaCarga || 'N/A'}</p>`;
+                            const desiredFields = [
+                                { key: 'fechaCarga', label: 'FECHA DE CARGA' },
+                                { key: 'horaCarga', label: 'HORA DE CARGA' },
+                                { key: 'fechaDelHecho', label: 'FECHA DEL HECHO' },
+                                { key: 'horaDelHecho', label: 'HORA DEL HECHO' },
+                                { key: 'sumario', label: 'SUMARIO' },
+                                { key: 'dependencia', label: 'DEPENDENCIA' },
+                                { key: 'encuadreLegal', label: 'ENCUADRE LEGAL' },
+                                { key: 'detallesNovedad', label: 'DETALLES DE LA NOVEDAD' }, // Asumo 'detallesNovedad' es el campo correcto
+                                { key: 'calle', label: 'CALLE' },
+                                { key: 'barrio', label: 'BARRIO' },
+                                { key: 'coordenadas', label: 'UBICACION (Lat/Lon)' }, // Manejaremos esto de forma especial
+                                { key: 'lugar', label: 'LUGAR' },
+                                { key: 'bienAfectado', label: 'BIEN AFECTADO' },
+                                { key: 'victima', label: 'DATOS DE LA VICTIMA' },
+                                { key: 'nombreImputado', label: 'DATOS DEL IMPUTADO' }, // Asumo 'nombreImputado' es el campo correcto
+                                { key: 'esclarecidos', label: 'ESTADO/SITUACION' }
+                            ];
 
-                            for (const key in novedad) {
-                                if (novedad.hasOwnProperty(key)) {
-                                    if (['fechaDelHecho', 'horaDelHecho', 'fechaCarga', 'horaCarga', 'id', 'latitud', 'longitud'].includes(key)) {
-                                        continue;
-                                    }
-                                    let displayKey = key.replace(/([A-Z])/g, ' $1').toUpperCase();
-                                    let displayValue = novedad[key];
+                            desiredFields.forEach(field => {
+                                let displayValue = novedad[field.key];
+                                let displayLabel = field.label;
 
-                                    if (key === 'coordenadas') {
-                                        const [lat, lng] = displayValue.split(',');
-                                        displayValue = `Lat: ${parseFloat(lat).toFixed(4)}, Lon: ${parseFloat(lng).toFixed(4)}`;
-                                    } else if (key === 'esclarecidos') {
-                                        displayKey = 'ESTADO/SITUACION';
-                                        displayValue = String(novedad[key]).toUpperCase();
-                                    } else if (key === 'departamento' || key === 'dependencia' || key === 'victima' || key === 'nombreImputado' || key === 'lugar' || key === 'bienAfectado' || key === 'encuadreLegal') {
-                                        displayValue = String(novedad[key]).toUpperCase();
-                                    } else if (key === 'altura' || key === 'entreCalles' || key === 'edadVictima' || key === 'generoVictima' || key === 'observaciones') {
-                                        if (!displayValue) continue;
-                                    }
-                                    
-                                    cardContent += `<p><strong>${displayKey}:</strong> ${displayValue}</p>`;
+                                if (field.key === 'coordenadas' && displayValue) {
+                                    const [lat, lng] = displayValue.split(',');
+                                    cardContent += `<p><strong>LATITUD:</strong> ${parseFloat(lat).toFixed(4)}</p>`;
+                                    cardContent += `<p><strong>LONGITUD:</strong> ${parseFloat(lng).toFixed(4)}</p>`;
+                                    return; // Skip adding the default coordinates line
+                                } else if (field.key === 'esclarecidos' && displayValue) {
+                                    displayValue = String(displayValue).toUpperCase();
+                                } else if (displayValue) {
+                                    displayValue = String(displayValue).toUpperCase();
                                 }
-                            }
+
+                                if (displayValue !== undefined && displayValue !== null && displayValue !== '') {
+                                    cardContent += `<p><strong>${displayLabel}:</strong> ${displayValue}</p>`;
+                                }
+                            });
                             novedadCard.innerHTML = cardContent;
 
                             if (userRole === 'admin' || userRole === 'user-oficiales') {
