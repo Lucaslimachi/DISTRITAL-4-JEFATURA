@@ -156,14 +156,14 @@
                                 { key: 'sumario', label: 'SUMARIO' },
                                 { key: 'dependencia', label: 'DEPENDENCIA' },
                                 { key: 'encuadreLegal', label: 'ENCUADRE LEGAL' },
-                                { key: 'detallesNovedad', label: 'DETALLES DE LA NOVEDAD' },
+                                { key: 'detallesNovedad', label: 'DETALLES DE LA NOVEDAD' }, // Asumo este nombre en el objeto novedad
                                 { key: 'calle', label: 'CALLE' },
                                 { key: 'barrio', label: 'BARRIO' },
                                 { key: 'coordenadas', label: '' }, // Se manejará como Latitud y Longitud
                                 { key: 'lugar', label: 'LUGAR' },
                                 { key: 'bienAfectado', label: 'BIEN AFECTADO' },
                                 { key: 'victima', label: 'DATOS DE LA VICTIMA' },
-                                { key: 'nombreImputado', label: 'DATOS DEL IMPUTADO' },
+                                { key: 'nombreImputado', label: 'DATOS DEL IMPUTADO' }, // Asumo este nombre en el objeto novedad
                                 { key: 'esclarecidos', label: 'ESTADO/SITUACION' }
                             ];
 
@@ -171,13 +171,28 @@
                                 let displayValue = novedad[field.key];
                                 let displayLabel = field.label;
 
-                                if (field.key === 'coordenadas' && displayValue) {
-                                    const [lat, lng] = displayValue.split(',');
-                                    cardContent += `<p><strong>LATITUD:</strong> ${parseFloat(lat).toFixed(4)}</p>`;
-                                    cardContent += `<p><strong>LONGITUD:</strong> ${parseFloat(lng).toFixed(4)}</p>`;
-                                    // No hay 'return' aquí para permitir que otros campos se procesen si se desea
-                                } else if (displayValue !== undefined && displayValue !== null && displayValue !== '') {
-                                    cardContent += `<p><strong>${displayLabel}:</strong> ${String(displayValue).toUpperCase()}</p>`;
+                                if (field.key === 'detallesNovedad' && !displayValue) {
+                                    // Fallback para 'detallesNovedad' si el campo es 'observaciones' en el backend
+                                    displayValue = novedad.observaciones;
+                                }
+                                if (field.key === 'nombreImputado' && !displayValue) {
+                                    // No hay un fallback común para nombreImputado, pero se mantiene la lógica si existiera
+                                    displayValue = novedad.nombreImputado; // Asegurarse de que esté definida en el modelo/data
+                                }
+
+                                if (field.key === 'coordenadas') {
+                                    if (displayValue) {
+                                        const [lat, lng] = displayValue.split(',');
+                                        cardContent += `<p><strong>LATITUD:</strong> ${parseFloat(lat).toFixed(4)}</p>`;
+                                        cardContent += `<p><strong>LONGITUD:</strong> ${parseFloat(lng).toFixed(4)}</p>`;
+                                    } else {
+                                        cardContent += `<p><strong>LATITUD:</strong> N/A</p>`;
+                                        cardContent += `<p><strong>LONGITUD:</strong> N/A</p>`;
+                                    }
+                                } else {
+                                    // Para otros campos, mostrar el valor o 'N/A'
+                                    const valueToDisplay = (displayValue !== undefined && displayValue !== null && displayValue !== '') ? String(displayValue).toUpperCase() : 'N/A';
+                                    cardContent += `<p><strong>${displayLabel}:</strong> ${valueToDisplay}</p>`;
                                 }
                             });
                             novedadCard.innerHTML = cardContent;
