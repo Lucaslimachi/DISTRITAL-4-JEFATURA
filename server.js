@@ -6,6 +6,12 @@ const path = require('path'); // Import path module
 const { Sequelize, DataTypes } = require('sequelize');
 
 const app = express();
+
+app.use((req, res, next) => {
+  console.log(`BACKEND DEBUG: Petición global: ${req.method} ${req.originalUrl}`);
+  next();
+});
+
 const PORT = process.env.PORT || 3001; // Cambiado a 3001 temporalmente
 
 // Configuración de Sequelize para PostgreSQL
@@ -160,6 +166,7 @@ async function syncDB() {
 syncDB();
 
 // Middleware para autenticación JWT
+console.log('BACKEND DEBUG: Petición recibida antes de authenticateToken.'); // Nuevo log
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -198,13 +205,14 @@ app.get('/novedades', authenticateToken, async (req, res) => {
 // Guardar una nueva novedad
 app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), async (req, res) => {
   const newNovedadData = req.body;
+  console.log('BACKEND DEBUG: Datos recibidos para nueva novedad:', newNovedadData); // Añadido para depuración
   try {
     const newNovedad = await Novedad.create(newNovedadData);
     res.status(201).json(newNovedad);
   } catch (error) {
     console.error('BACKEND DEBUG: Error al guardar nueva novedad:', error);
     console.error('BACKEND DEBUG: Detalles del error de la novedad:', error.message, error.errors); // Agregado para más detalles
-    res.status(500).json({ message: 'Error interno del servidor al guardar novedad' });
+    res.status(500).json({ message: 'Error interno del servidor al guardar novedad', details: error.message, errors: error.errors }); // Modificado para devolver detalles del error
   }
 });
 
