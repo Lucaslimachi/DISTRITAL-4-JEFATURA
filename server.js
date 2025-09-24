@@ -140,6 +140,10 @@ const Novedad = sequelize.define('Novedad', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  expediente: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   dependencia: {
     type: DataTypes.STRING,
     allowNull: true,
