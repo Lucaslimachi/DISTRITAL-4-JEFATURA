@@ -112,10 +112,6 @@ const Novedad = sequelize.define('Novedad', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  circunscripcion: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
   coordenadas: {
     type: DataTypes.STRING,
     allowNull: false,
