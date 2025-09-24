@@ -136,6 +136,14 @@ const Novedad = sequelize.define('Novedad', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  fechaCreacion: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  horaCarga: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, {
   timestamps: false,
 });
