@@ -64,6 +64,27 @@
         const API_BASE_URL = 'https://distrital-4-jefatura.onrender.com'; // Define the API base URL
         let allNovedades = []; // Variable global para almacenar todas las novedades
 
+        // Definición de los campos deseados para los popups del mapa
+        const desiredFieldsMap = [
+            { key: 'fechaCreacion', label: 'FECHA DE CARGA' },
+            { key: 'horaCarga', label: 'HORA DE CARGA' },
+            { key: 'fechaDelHecho', label: 'FECHA DEL HECHO' },
+            { key: 'horaDelHecho', label: 'HORA DEL HECHO' },
+            { key: 'sumario', label: 'SUMARIO' },
+            { key: 'expediente', label: 'EXPEDIENTE' },
+            { key: 'dependencia', label: 'DEPENDENCIA' },
+            { key: 'encuadreLegal', label: 'ENCUADRE LEGAL' },
+            { key: 'detallesNovedad', label: 'DETALLES DE LA NOVEDAD' },
+            { key: 'calle', label: 'CALLE' },
+            { key: 'barrio', label: 'BARRIO' },
+            { key: 'coordenadas', label: '' }, // Se manejará como Latitud y Longitud
+            { key: 'lugar', label: 'LUGAR' },
+            { key: 'bienAfectado', label: 'BIEN AFECTADO' },
+            { key: 'victima', label: 'DATOS DE LA VICTIMA' },
+            { key: 'nombreImputado', label: 'DATOS DEL IMPUTADO' },
+            { key: 'esclarecidos', label: 'ESTADO/SITUACION' }
+        ];
+
         document.addEventListener('DOMContentLoaded', function() {
             const map = L.map('delictualMap').setView([-33.5777777778, -69.0172222222], 12); // Centrado en Tunuyán
 
@@ -124,7 +145,7 @@
 
             // Función para popular las opciones de los filtros
             function populateFilters() {
-                const departamentos = new Set();
+                
                 const dependencias = new Set();
                 const lugares = new Set();
                 const encuadresLegales = new Set();
@@ -136,36 +157,34 @@
                     if (novedad.encuadreLegal) encuadresLegales.add(novedad.encuadreLegal);
                 });
 
-                // Llenar select de Departamentos
                 
                 
-                // Llenar select de Dependencias
+                
                 filterDependenciaSelect.innerHTML = '<option value="">Todas</option>';
-                dependencias.forEach(dep => {
+                Array.from(dependencias).sort().forEach(dep => {
                     const option = document.createElement('option');
                     option.value = dep;
                     option.textContent = dep.toUpperCase();
                     filterDependenciaSelect.appendChild(option);
                 });
 
-                // Llenar select de Lugares
+                
                 filterLugarSelect.innerHTML = '<option value="">Todos</option>';
-                lugares.forEach(lug => {
+                Array.from(lugares).sort().forEach(lug => {
                     const option = document.createElement('option');
                     option.value = lug;
                     option.textContent = lug.toUpperCase();
                     filterLugarSelect.appendChild(option);
                 });
 
-                // Llenar datalist de Encuadre Legal
+                
                 filterEncuadreLegalOptionsDatalist.innerHTML = '';
-                encuadresLegales.forEach(enc => {
+                Array.from(encuadresLegales).sort().forEach(enc => {
                     const option = document.createElement('option');
                     option.value = enc;
                     filterEncuadreLegalOptionsDatalist.appendChild(option);
                 });
 
-                // Llenar select de Intervalo del Día
                 // The dayTimeIntervals set was removed, so this loop is no longer needed.
                 // The options for Intervalo del Día are now hardcoded in the HTML.
             }
@@ -175,37 +194,53 @@
                 markers.clearLayers(); // Limpiar marcadores existentes
 
                 novedadesToRender.forEach(novedad => {
-                    if (novedad.latitud && novedad.longitud) {
-                        const lat = parseFloat(novedad.latitud);
-                        const lng = parseFloat(novedad.longitud);
-                        const latlng = L.latLng(lat, lng);
+                    if (novedad.coordenadas) { // Verificar si existen coordenadas
+                        const [latStr, lngStr] = novedad.coordenadas.split(',');
+                        const lat = parseFloat(latStr);
+                        const lng = parseFloat(lngStr);
+                        
+                        if (!isNaN(lat) && !isNaN(lng)) { // Asegurarse de que son números válidos
+                            const latlng = L.latLng(lat, lng);
 
-                        let popupContent = '<b>Novedad Registrada</b><br>';
-                        for (const key in novedad) {
-                            if (novedad.hasOwnProperty(key)) {
-                                let displayKey = key.replace(/([A-Z])/g, ' $1').toUpperCase();
-                                if (key === 'latitud' || key === 'longitud') {
-                                    displayKey = key.toUpperCase();
-                                } else if (key === 'esclarecidos') {
-                                    displayKey = 'DATOS DEL IMPUTADO';
-                                } else if (key === 'victima') {
-                                    displayKey = 'DATOS DE LA VICTIMA';
-                                } else if (key === 'departamento' || key === 'dependencia' || key === 'lugar' || key === 'encuadreLegal') {
-                                    displayKey = key.toUpperCase();
+                            let popupContent = '<b>Novedad Registrada</b><br>';
+                            desiredFieldsMap.forEach(field => {
+                                let displayValue = novedad[field.key];
+                                let displayLabel = field.label;
+
+                                if (field.key === 'detallesNovedad' && !displayValue) {
+                                    // displayValue = novedad.observaciones; // Fallback eliminado
                                 }
-                                popupContent += `<p><strong>${displayKey}:</strong> ${novedad[key]}</p>`;
-                            }
-                        }
 
-                        L.marker(latlng).addTo(markers)
-                            .bindPopup(popupContent);
+                                if (field.key === 'coordenadas') {
+                                    if (novedad.coordenadas) {
+                                        const [c_lat, c_lng] = novedad.coordenadas.split(',');
+                                        popupContent += `<p><strong>LATITUD:</strong> ${parseFloat(c_lat).toFixed(4)}</p>`;
+                                        popupContent += `<p><strong>LONGITUD:</strong> ${parseFloat(c_lng).toFixed(4)}</p>`;
+                                    } else {
+                                        popupContent += `<p><strong>LATITUD:</strong> N/A</p>`;
+                                        popupContent += `<p><strong>LONGITUD:</strong> N/A</p>`;
+                                    }
+                                } else if (field.key === 'nombreImputado') {
+                                    const valueToDisplay = (displayValue !== undefined && displayValue !== null && displayValue !== '') ? String(displayValue).toUpperCase() : 'N/A';
+                                    popupContent += `<p><strong>${displayLabel}:</strong> <span style="color: red; font-weight: bold;">${valueToDisplay}</span></p>`;
+                                } else {
+                                    const valueToDisplay = (displayValue !== undefined && displayValue !== null && displayValue !== '') ? String(displayValue).toUpperCase() : 'N/A';
+                                    if (displayLabel) { // Solo añadir si hay un label para mostrar
+                                        popupContent += `<p><strong>${displayLabel}:</strong> ${valueToDisplay}</p>`;
+                                    }
+                                }
+                            });
+
+                            L.marker(latlng).addTo(markers)
+                                .bindPopup(popupContent);
+                        }
                     }
                 });
             }
 
             // Inicializar filtros y mostrar todas las novedades al cargar
-            populateFilters();
-            renderMapMarkers(allNovedades);
+            // populateFilters(); // Se llama dentro de fetchNovedades
+            // renderMapMarkers(allNovedades); // Se llama dentro de fetchNovedades
 
             // Evento para aplicar filtros
             applyMapFiltersBtn.addEventListener('click', function() {
@@ -231,26 +266,31 @@
                     filteredNovedades = filteredNovedades.filter(novedad => novedad.encuadreLegal === selectedEncuadreLegal);
                 }
 
-                // Filtrar por rango de fechas
+                // Filtrar por rango de fechas (usando fechaDelHecho o fechaCreacion)
                 if (startDate) {
-                    filteredNovedades = filteredNovedades.filter(novedad => novedad.fecha >= startDate);
+                    filteredNovedades = filteredNovedades.filter(novedad => {
+                        const fechaNovedad = novedad.fechaDelHecho || novedad.fechaCreacion;
+                        return fechaNovedad && fechaNovedad >= startDate;
+                    });
                 }
                 if (endDate) {
-                    filteredNovedades = filteredNovedades.filter(novedad => novedad.fecha <= endDate);
+                    filteredNovedades = filteredNovedades.filter(novedad => {
+                        const fechaNovedad = novedad.fechaDelHecho || novedad.fechaCreacion;
+                        return fechaNovedad && fechaNovedad <= endDate;
+                    });
                 }
 
                 // Nuevo filtro por Nombre del Imputado
                 if (filterImputadoMap) {
                     filteredNovedades = filteredNovedades.filter(novedad => {
-                        // Buscar en novedad.nombreImputado y hacer la comparación insensible a mayúsculas/minúsculas
                         return novedad.nombreImputado && String(novedad.nombreImputado).toLowerCase().includes(filterImputadoMap);
                     });
                 }
 
-                // Nuevo filtro por Intervalo del Día
+                // Nuevo filtro por Intervalo del Día (usando horaDelHecho o horaCarga)
                 if (filterDayTimeInterval) {
                     filteredNovedades = filteredNovedades.filter(novedad => {
-                        const novedadTime = novedad.horaDelHecho; // Asumiendo que 'horaDelHecho' es el campo relevante
+                        const novedadTime = novedad.horaDelHecho || novedad.horaCarga; 
                         if (!novedadTime) return false;
 
                         const [hours, minutes] = novedadTime.split(':').map(Number);
