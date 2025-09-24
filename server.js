@@ -136,6 +136,34 @@ const Novedad = sequelize.define('Novedad', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  sumario: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  dependencia: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  detallesNovedad: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  lugar: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  bienAfectado: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  nombreImputado: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  esclarecidos: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   fechaCreacion: {
     type: DataTypes.STRING,
     allowNull: true,
