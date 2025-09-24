@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3001; // Cambiado a 3001 temporalmente
 
 // Configuración de Sequelize para PostgreSQL
-const sequelize = new Sequelize('postgresql://distrital_4_jefatura_postgres_user:kVxxkk2xSD5PBqblPlGoylfPM93khoa8@dpg-d38quqogjchc73d9cnm0-a/distrital_4_jefatura_postgres', {
+const sequelize = new Sequelize('postgresql://distrital_4_jefatura_postgres_user:kVxxkk2xSD5PBqblPlGoylfPM93khoa8@dpg-d38quqogjchc73d9cnm0-a.oregon-postgres.render.com/distrital_4_jefatura_postgres', {
   dialect: 'postgres',
   protocol: 'postgres',
   dialectOptions: {
@@ -203,6 +203,7 @@ app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficial
     res.status(201).json(newNovedad);
   } catch (error) {
     console.error('BACKEND DEBUG: Error al guardar nueva novedad:', error);
+    console.error('BACKEND DEBUG: Detalles del error de la novedad:', error.message, error.errors); // Agregado para más detalles
     res.status(500).json({ message: 'Error interno del servidor al guardar novedad' });
   }
 });
@@ -225,6 +226,7 @@ app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-ofic
     }
   } catch (error) {
     console.error('BACKEND DEBUG: Error al actualizar novedad:', error);
+    console.error('BACKEND DEBUG: Detalles del error de actualización de la novedad:', error.message, error.errors); // Agregado para más detalles
     res.status(500).json({ message: 'Error interno del servidor al actualizar novedad' });
   }
 });
