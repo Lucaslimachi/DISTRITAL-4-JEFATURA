@@ -185,7 +185,11 @@
                                         cardContent += `<p><strong>LATITUD:</strong> N/A</p>`;
                                         cardContent += `<p><strong>LONGITUD:</strong> N/A</p>`;
                                     }
-                                } else {
+                                } else if (field.key === 'nombreImputado') {
+                                    const valueToDisplay = (displayValue !== undefined && displayValue !== null && displayValue !== '') ? String(displayValue).toUpperCase() : 'N/A';
+                                    cardContent += `<p><strong>${displayLabel}:</strong> <span style="color: red; font-weight: bold;">${valueToDisplay}</span></p>`;
+                                }
+                                else {
                                     const valueToDisplay = (displayValue !== undefined && displayValue !== null && displayValue !== '') ? String(displayValue).toUpperCase() : 'N/A';
                                     cardContent += `<p><strong>${displayLabel}:</strong> ${valueToDisplay}</p>`;
                                 }
