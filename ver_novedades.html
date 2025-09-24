@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="ver_novedades.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="view-novedades-container">
@@ -31,9 +32,18 @@
                     <option value="">Todos</option>
                 </select>
             </div>
+            <div class="filter-group">
+                <label for="filterImputado">Nombre del Imputado:</label>
+                <input type="text" id="filterImputado" placeholder="Filtrar por nombre del imputado">
+            </div>
+            <div class="filter-group">
+                <label for="filterVictima">Nombre de la Victima:</label>
+                <input type="text" id="filterVictima" placeholder="Filtrar por nombre de la victima">
+            </div>
             <button id="applyFiltersBtn">Filtrar</button>
             <button id="clearFiltersBtn">Limpiar Filtros</button>
             <button id="downloadPdfBtn">Descargar PDF</button>
+            <button id="downloadExcelBtn">Descargar Excel</button>
         </div>
 
         <div id="novedadesList"></div>
@@ -43,173 +53,170 @@
     <script>
         const API_BASE_URL = 'https://distrital-4-jefatura.onrender.com'; // Define the API base URL
         let allNovedades = []; // Variable global para almacenar todas las novedades
-        const novedadesListDiv = document.getElementById('novedadesList');
-
-        const filterDateInput = document.getElementById('filterDate');
-        const filterStartTimeInput = document.getElementById('filterStartTime');
-        const filterEndTimeInput = document.getElementById('filterEndTime');
-        const filterTipoDependenciaSelect = document.getElementById('filterTipoDependencia');
-        const applyFiltersBtn = document.getElementById('applyFiltersBtn');
-        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-
-        const userRole = localStorage.getItem('userRole'); // Obtener el rol del usuario
-
-        // Fetch novedades from API
-        function fetchNovedades() {
-            const token = localStorage.getItem('jwtToken');
-            if (!token) {
-                alert('No estás autenticado. Por favor, inicia sesión.');
-                window.location.href = 'index.html';
-                return;
-            }
-
-            fetch(`${API_BASE_URL}/novedades`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw new Error(err.message || 'Error al cargar las novedades.');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                allNovedades = data; // Store fetched data globally
-                populateFilters(allNovedades);
-                renderNovedades(allNovedades); // Render all initially
-            })
-            .catch(error => {
-                console.error('Error al obtener novedades:', error);
-                alert(`Error: ${error.message}`);
-            });
-        }
-
-        function renderNovedades(novedadesToRender) {
-            novedadesListDiv.innerHTML = ''; // Limpiar la lista actual
-
-            if (novedadesToRender.length === 0) {
-                novedadesListDiv.innerHTML = '<p>No hay partes de novedades para mostrar con los filtros aplicados.</p>';
-                return;
-            }
-
-            const groupedNovedades = {};
-            novedadesToRender.forEach(novedad => {
-                // Usar fechaDelHecho para agrupar, o fechaCarga si fechaDelHecho no está disponible
-                const fecha = novedad.fechaDelHecho || novedad.fechaCarga;
-                const hora = novedad.horaDelHecho || novedad.horaCarga; // Usar horaDelHecho si existe, sino horaCarga
-
-                if (!groupedNovedades[fecha]) {
-                    groupedNovedades[fecha] = {};
-                }
-                if (!groupedNovedades[fecha][hora]) {
-                    groupedNovedades[fecha][hora] = [];
-                }
-                groupedNovedades[fecha][hora].push(novedad);
-            });
-
-            const sortedFechas = Object.keys(groupedNovedades).sort().reverse();
-
-            sortedFechas.forEach(fecha => {
-                const dateSection = document.createElement('div');
-                dateSection.classList.add('date-section');
-                dateSection.innerHTML = `<h2>Fecha: ${fecha}</h2>`;
-                novedadesListDiv.appendChild(dateSection);
-
-                const sortedHoras = Object.keys(groupedNovedades[fecha]).sort();
-
-                sortedHoras.forEach(hora => {
-                    const timeSection = document.createElement('div');
-                    timeSection.classList.add('time-section');
-                    timeSection.innerHTML = `<h3>Hora: ${hora}</h3>`;
-                    dateSection.appendChild(timeSection);
-
-                    groupedNovedades[fecha][hora].forEach(novedad => {
-                        const novedadCard = document.createElement('div');
-                        novedadCard.classList.add('novedad-card');
-                        let cardContent = '';
-
-                        cardContent += `<p><strong>FECHA DEL HECHO:</strong> ${novedad.fechaDelHecho || 'N/A'}</p>`;
-                        cardContent += `<p><strong>HORA DEL HECHO:</strong> ${novedad.horaDelHecho || 'N/A'}</p>`;
-                        cardContent += `<p><strong>FECHA DE CARGA:</strong> ${novedad.fechaCarga || 'N/A'}</p>`;
-                        cardContent += `<p><strong>HORA DE CARGA:</strong> ${novedad.horaCarga || 'N/A'}</p>`;
-
-                        for (const key in novedad) {
-                            if (novedad.hasOwnProperty(key)) {
-                                // Omitir propiedades que ya se muestran explícitamente o que no queremos mostrar
-                                if (['fechaDelHecho', 'horaDelHecho', 'fechaCarga', 'horaCarga', 'id', 'latitud', 'longitud'].includes(key)) {
-                                    continue;
-                                }
-
-                                let displayKey = key.replace(/([A-Z])/g, ' $1').toUpperCase();
-                                let displayValue = novedad[key];
-
-                                if (key === 'coordenadas') {
-                                    const [lat, lng] = displayValue.split(',');
-                                    displayValue = `Lat: ${parseFloat(lat).toFixed(4)}, Lon: ${parseFloat(lng).toFixed(4)}`;
-                                } else if (key === 'esclarecidos') {
-                                    displayKey = 'ESTADO/SITUACION';
-                                    displayValue = String(novedad[key]).toUpperCase();
-                                } else if (key === 'departamento' || key === 'dependencia' || key === 'victima' || key === 'nombreImputado' || key === 'lugar' || key === 'bienAfectado' || key === 'encuadreLegal') {
-                                    displayValue = String(novedad[key]).toUpperCase();
-                                } else if (key === 'altura' || key === 'entreCalles' || key === 'edadVictima' || key === 'generoVictima' || key === 'observaciones') {
-                                    if (!displayValue) continue; // No mostrar si es nulo o vacío
-                                }
-                                
-                                cardContent += `<p><strong>${displayKey}:</strong> ${displayValue}</p>`;
-                            }
-                        }
-                        novedadCard.innerHTML = cardContent;
-
-                        if (userRole === 'admin' || userRole === 'user-oficiales') {
-                            const editButton = document.createElement('button');
-                            editButton.textContent = 'Editar';
-                            editButton.classList.add('edit-btn');
-                            editButton.onclick = () => editNovedad(novedad.id);
-                            novedadCard.appendChild(editButton);
-
-                            const deleteButton = document.createElement('button');
-                            deleteButton.textContent = 'Eliminar';
-                            deleteButton.classList.add('delete-btn');
-                            deleteButton.onclick = () => deleteNovedad(novedad.id);
-                            novedadCard.appendChild(deleteButton);
-                        }
-                        timeSection.appendChild(novedadCard);
-                    });
-                });
-            });
-        }
-
-        // Función para popular las opciones de los filtros
-        function populateFilters(novedadesData) {
-            const tiposDependencia = new Set();
-            const dependencias = new Set(); // Para agrupar por dependencia completa si es necesario
-
-            novedadesData.forEach(novedad => {
-                if (novedad.dependencia) {
-                    // Extraer el tipo de dependencia, por ejemplo, 'COMISARIA' o 'SUBCOMISARIA'
-                    const tipo = novedad.dependencia.split(' ')[0];
-                    tiposDependencia.add(tipo);
-                    dependencias.add(novedad.dependencia);
-                }
-            });
-
-            // Llenar select de Tipo de Dependencia
-            filterTipoDependenciaSelect.innerHTML = '<option value="">Todos</option>'; // Resetear
-            tiposDependencia.forEach(tipo => {
-                const option = document.createElement('option');
-                option.value = tipo;
-                option.textContent = tipo.toUpperCase();
-                filterTipoDependenciaSelect.appendChild(option);
-            });
-            // Opcional: si quieres un filtro para cada dependencia específica, puedes añadir otro select
-            // por ejemplo, para 'Comisaría 15', 'Comisaría 18', etc.
-        }
+        let currentNovedadesToRender = []; // Variable para almacenar las novedades actuales renderizadas
 
         document.addEventListener('DOMContentLoaded', function() {
+            const novedadesListDiv = document.getElementById('novedadesList');
+
+            const filterDateInput = document.getElementById('filterDate');
+            const filterStartTimeInput = document.getElementById('filterStartTime');
+            const filterEndTimeInput = document.getElementById('filterEndTime');
+            const filterTipoDependenciaSelect = document.getElementById('filterTipoDependencia');
+            const filterImputadoInput = document.getElementById('filterImputado');
+            const filterVictimaInput = document.getElementById('filterVictima');
+            const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+            const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+            const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+            const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+
+            const userRole = localStorage.getItem('userRole'); // Obtener el rol del usuario
+
+            // Fetch novedades from API
+            function fetchNovedades() {
+                const token = localStorage.getItem('jwtToken');
+                if (!token) {
+                    alert('No estás autenticado. Por favor, inicia sesión.');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                fetch(`${API_BASE_URL}/novedades`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.message || 'Error al cargar las novedades.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    allNovedades = data; // Store fetched data globally
+                    populateFilters(allNovedades);
+                    renderNovedades(allNovedades); // Render all initially
+                })
+                .catch(error => {
+                    console.error('Error al obtener novedades:', error);
+                    alert(`Error: ${error.message}`);
+                });
+            }
+
+            function renderNovedades(novedadesToRender) {
+                currentNovedadesToRender = novedadesToRender; // Actualizar la variable global
+                novedadesListDiv.innerHTML = ''; // Limpiar la lista actual
+
+                if (novedadesToRender.length === 0) {
+                    novedadesListDiv.innerHTML = '<p>No hay partes de novedades para mostrar con los filtros aplicados.</p>';
+                    return;
+                }
+
+                const groupedNovedades = {};
+                novedadesToRender.forEach(novedad => {
+                    const fecha = novedad.fechaDelHecho || novedad.fechaCarga;
+                    const hora = novedad.horaDelHecho || novedad.horaCarga;
+
+                    if (!groupedNovedades[fecha]) {
+                        groupedNovedades[fecha] = {};
+                    }
+                    if (!groupedNovedades[fecha][hora]) {
+                        groupedNovedades[fecha][hora] = [];
+                    }
+                    groupedNovedades[fecha][hora].push(novedad);
+                });
+
+                const sortedFechas = Object.keys(groupedNovedades).sort().reverse();
+
+                sortedFechas.forEach(fecha => {
+                    const dateSection = document.createElement('div');
+                    dateSection.classList.add('date-section');
+                    dateSection.innerHTML = `<h2>Fecha: ${fecha}</h2>`;
+                    novedadesListDiv.appendChild(dateSection);
+
+                    const sortedHoras = Object.keys(groupedNovedades[fecha]).sort();
+
+                    sortedHoras.forEach(hora => {
+                        const timeSection = document.createElement('div');
+                        timeSection.classList.add('time-section');
+                        timeSection.innerHTML = `<h3>Hora: ${hora}</h3>`;
+                        dateSection.appendChild(timeSection);
+
+                        groupedNovedades[fecha][hora].forEach(novedad => {
+                            const novedadCard = document.createElement('div');
+                            novedadCard.classList.add('novedad-card');
+                            let cardContent = '';
+
+                            cardContent += `<p><strong>FECHA DEL HECHO:</strong> ${novedad.fechaDelHecho || 'N/A'}</p>`;
+                            cardContent += `<p><strong>HORA DEL HECHO:</strong> ${novedad.horaDelHecho || 'N/A'}</p>`;
+                            cardContent += `<p><strong>FECHA DE CARGA:</strong> ${novedad.fechaCarga || 'N/A'}</p>`;
+                            cardContent += `<p><strong>HORA DE CARGA:</strong> ${novedad.horaCarga || 'N/A'}</p>`;
+
+                            for (const key in novedad) {
+                                if (novedad.hasOwnProperty(key)) {
+                                    if (['fechaDelHecho', 'horaDelHecho', 'fechaCarga', 'horaCarga', 'id', 'latitud', 'longitud'].includes(key)) {
+                                        continue;
+                                    }
+                                    let displayKey = key.replace(/([A-Z])/g, ' $1').toUpperCase();
+                                    let displayValue = novedad[key];
+
+                                    if (key === 'coordenadas') {
+                                        const [lat, lng] = displayValue.split(',');
+                                        displayValue = `Lat: ${parseFloat(lat).toFixed(4)}, Lon: ${parseFloat(lng).toFixed(4)}`;
+                                    } else if (key === 'esclarecidos') {
+                                        displayKey = 'ESTADO/SITUACION';
+                                        displayValue = String(novedad[key]).toUpperCase();
+                                    } else if (key === 'departamento' || key === 'dependencia' || key === 'victima' || key === 'nombreImputado' || key === 'lugar' || key === 'bienAfectado' || key === 'encuadreLegal') {
+                                        displayValue = String(novedad[key]).toUpperCase();
+                                    } else if (key === 'altura' || key === 'entreCalles' || key === 'edadVictima' || key === 'generoVictima' || key === 'observaciones') {
+                                        if (!displayValue) continue;
+                                    }
+                                    
+                                    cardContent += `<p><strong>${displayKey}:</strong> ${displayValue}</p>`;
+                                }
+                            }
+                            novedadCard.innerHTML = cardContent;
+
+                            if (userRole === 'admin' || userRole === 'user-oficiales') {
+                                const editButton = document.createElement('button');
+                                editButton.textContent = 'Editar';
+                                editButton.classList.add('edit-btn');
+                                editButton.onclick = () => editNovedad(novedad.id);
+                                novedadCard.appendChild(editButton);
+
+                                const deleteButton = document.createElement('button');
+                                deleteButton.textContent = 'Eliminar';
+                                deleteButton.classList.add('delete-btn');
+                                deleteButton.onclick = () => deleteNovedad(novedad.id);
+                                novedadCard.appendChild(deleteButton);
+                            }
+                            timeSection.appendChild(novedadCard);
+                        });
+                    });
+                });
+            }
+
+            // Función para popular las opciones de los filtros
+            function populateFilters(novedadesData) {
+                const tiposDependencia = new Set();
+
+                novedadesData.forEach(novedad => {
+                    if (novedad.dependencia) {
+                        const tipo = novedad.dependencia.split(' ')[0];
+                        tiposDependencia.add(tipo);
+                    }
+                });
+
+                filterTipoDependenciaSelect.innerHTML = '<option value="">Todos</option>';
+                tiposDependencia.forEach(tipo => {
+                    const option = document.createElement('option');
+                    option.value = tipo;
+                    option.textContent = tipo.toUpperCase();
+                    filterTipoDependenciaSelect.appendChild(option);
+                });
+            }
+
             fetchNovedades(); // Cargar las novedades desde el backend al iniciar la página
 
             applyFiltersBtn.addEventListener('click', function() {
@@ -217,6 +224,8 @@
                 const filterStartTime = filterStartTimeInput.value;
                 const filterEndTime = filterEndTimeInput.value;
                 const selectedTipoDependencia = filterTipoDependenciaSelect.value;
+                const filterImputado = filterImputadoInput.value.toLowerCase();
+                const filterVictima = filterVictimaInput.value.toLowerCase();
 
                 let filtered = [...allNovedades];
 
@@ -241,6 +250,18 @@
                     });
                 }
 
+                if (filterImputado) {
+                    filtered = filtered.filter(novedad => {
+                        return novedad.nombreImputado && String(novedad.nombreImputado).toLowerCase().includes(filterImputado);
+                    });
+                }
+
+                if (filterVictima) {
+                    filtered = filtered.filter(novedad => {
+                        return novedad.victima && String(novedad.victima).toLowerCase().includes(filterVictima);
+                    });
+                }
+
                 renderNovedades(filtered);
             });
 
@@ -248,50 +269,97 @@
                 filterDateInput.value = '';
                 filterStartTimeInput.value = '';
                 filterEndTimeInput.value = '';
-                filterTipoDependenciaSelect.value = ''; // Limpiar el nuevo filtro
+                filterTipoDependenciaSelect.value = '';
+                filterImputadoInput.value = '';
+                filterVictimaInput.value = '';
                 renderNovedades(allNovedades); // Renderizar todas las novedades
             });
 
             downloadPdfBtn.addEventListener('click', function() {
                 const element = document.getElementById('novedadesList');
-                html2pdf().from(element).save('partes_de_novedades.pdf');
+                const today = new Date();
+                const dateString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+                const filename = `PARTE DE NOVEDADES_${dateString}.pdf`;
+                html2pdf().from(element).save(filename);
             });
-        });
 
-        function deleteNovedad(id) {
-            if (confirm('¿Estás seguro de que quieres eliminar esta novedad? Esta acción no se puede deshacer.')) {
-                const token = localStorage.getItem('jwtToken');
-                if (!token) {
-                    alert('No estás autenticado. Por favor, inicia sesión.');
-                    window.location.href = 'index.html';
+            downloadExcelBtn.addEventListener('click', function() {
+                const today = new Date();
+                const dateString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+                const filename = `PARTE DE NOVEDADES_${dateString}`;
+                exportToExcel(currentNovedadesToRender, filename);
+            });
+
+            function exportToExcel(data, filename) {
+                if (data.length === 0) {
+                    alert('No hay datos para exportar a Excel.');
                     return;
                 }
-                fetch(`${API_BASE_URL}/novedades/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(err => {
-                            throw new Error(err.message || 'Error al eliminar la novedad.');
-                        });
-                    }
-                    alert('Novedad eliminada exitosamente.');
-                    fetchNovedades(); // Refresh the list after deletion
-                })
-                .catch(error => {
-                    console.error('Error al eliminar novedad:', error);
-                    alert(`Error: ${error.message}`);
-                });
-            }
-        }
 
-        function editNovedad(id) {
-            // Redirigir a novedades_parte.html con el ID de la novedad
-            window.location.href = `novedades_parte.html?id=${id}`;
-        }
+                const wsData = [];
+                const headers = Object.keys(data[0]).map(key => {
+                    let displayKey = key.replace(/([A-Z])/g, ' $1').toUpperCase();
+                    if (key === 'latitud' || key === 'longitud') {
+                        displayKey = key.toUpperCase();
+                    } else if (key === 'esclarecidos') {
+                        displayKey = 'DATOS DEL IMPUTADO';
+                    }
+                    return displayKey;
+                });
+                wsData.push(headers);
+
+                data.forEach(novedad => {
+                    const row = Object.values(novedad).map(value => {
+                        if (typeof value === 'string') {
+                            return value.toUpperCase();
+                        }
+                        return value;
+                    });
+                    wsData.push(row);
+                });
+
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Novedades');
+
+                XLSX.writeFile(wb, `${filename}.xlsx`);
+            }
+
+            function deleteNovedad(id) {
+                if (confirm('¿Estás seguro de que quieres eliminar esta novedad? Esta acción no se puede deshacer.')) {
+                    const token = localStorage.getItem('jwtToken');
+                    if (!token) {
+                        alert('No estás autenticado. Por favor, inicia sesión.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    fetch(`${API_BASE_URL}/novedades/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                throw new Error(err.message || 'Error al eliminar la novedad.');
+                            });
+                        }
+                        alert('Novedad eliminada exitosamente.');
+                        fetchNovedades(); // Refresh the list after deletion
+                    })
+                    .catch(error => {
+                        console.error('Error al eliminar novedad:', error);
+                        alert(`Error: ${error.message}`);
+                    });
+                }
+            }
+
+            function editNovedad(id) {
+                window.location.href = `novedades_parte.html?id=${id}`;
+            }
+
+        });
     </script>
 </body>
 </html>
