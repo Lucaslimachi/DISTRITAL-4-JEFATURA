@@ -230,8 +230,8 @@
                         if (element.value) {
                             formData[element.name] = parseFloat(element.value);
                         } else {
-                            alert("Por favor, seleccione una ubicación en el mapa.");
-                            return;
+                            // No alertar aquí, simplemente no añadir al formData o añadir como vacío para el manejo posterior
+                            // formData[element.name] = null; // No se puede enviar null por la restricción notNull
                         }
                     } else if (element.id === 'horaHecho') { // Capturar horaHecho como horaDelHecho
                         formData['horaDelHecho'] = element.value;
@@ -242,6 +242,24 @@
                     }
                 }
             }
+
+            // Combinar latitud y longitud en el campo 'coordenadas'
+            const latitud = formData.latitud;
+            const longitud = formData.longitud;
+
+            if (latitud && longitud) {
+                formData.coordenadas = `${latitud},${longitud}`;
+            } else {
+                // Si no hay coordenadas, enviar una cadena vacía para no violar la restricción notNull
+                formData.coordenadas = ''; 
+            }
+            
+            // Eliminar latitud y longitud individuales del formData para evitar conflictos con el backend
+            delete formData.latitud;
+            delete formData.longitud;
+
+            // VALIDAR los datos recolectados antes de enviar
+            console.log('Frontend: Datos de formData a enviar:', formData); // <-- AGREGADO PARA DEBUG
 
             // Validar que el expediente empiece con 'P-' o 'T-'
             const expedienteValue = formData.expediente;
