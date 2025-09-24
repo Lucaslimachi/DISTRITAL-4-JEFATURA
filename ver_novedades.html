@@ -115,8 +115,8 @@
 
                 const groupedNovedades = {};
                 novedadesToRender.forEach(novedad => {
-                    const fecha = novedad.fechaDelHecho || novedad.fechaCarga;
-                    const hora = novedad.horaDelHecho || novedad.horaCarga;
+                    const fecha = novedad.fechaCreacion || novedad.fechaDelHecho;
+                    const hora = novedad.horaCarga || novedad.horaDelHecho;
 
                     if (!groupedNovedades[fecha]) {
                         groupedNovedades[fecha] = {};
@@ -130,18 +130,18 @@
                 const sortedFechas = Object.keys(groupedNovedades).sort().reverse();
 
                 sortedFechas.forEach(fecha => {
-                    const dateSection = document.createElement('div');
-                    dateSection.classList.add('date-section');
-                    dateSection.innerHTML = `<h2>Fecha: ${fecha}</h2>`;
-                    novedadesListDiv.appendChild(dateSection);
+                    // const dateSection = document.createElement('div'); // Eliminado
+                    // dateSection.classList.add('date-section'); // Eliminado
+                    // dateSection.innerHTML = `<h2>Fecha: ${fecha}</h2>`; // Eliminado
+                    // novedadesListDiv.appendChild(dateSection); // Eliminado
 
                     const sortedHoras = Object.keys(groupedNovedades[fecha]).sort();
 
                     sortedHoras.forEach(hora => {
-                        const timeSection = document.createElement('div');
-                        timeSection.classList.add('time-section');
-                        timeSection.innerHTML = `<h3>Hora: ${hora}</h3>`;
-                        dateSection.appendChild(timeSection);
+                        // const timeSection = document.createElement('div'); // Eliminado
+                        // timeSection.classList.add('time-section'); // Eliminado
+                        // timeSection.innerHTML = `<h3>Hora: ${hora}</h3>`; // Eliminado
+                        // dateSection.appendChild(timeSection); // Eliminado
 
                         groupedNovedades[fecha][hora].forEach(novedad => {
                             const novedadCard = document.createElement('div');
@@ -149,21 +149,21 @@
                             let cardContent = '';
 
                             const desiredFields = [
-                                { key: 'fechaCarga', label: 'FECHA DE CARGA' },
+                                { key: 'fechaCreacion', label: 'FECHA DE CARGA' },
                                 { key: 'horaCarga', label: 'HORA DE CARGA' },
                                 { key: 'fechaDelHecho', label: 'FECHA DEL HECHO' },
                                 { key: 'horaDelHecho', label: 'HORA DEL HECHO' },
                                 { key: 'sumario', label: 'SUMARIO' },
                                 { key: 'dependencia', label: 'DEPENDENCIA' },
                                 { key: 'encuadreLegal', label: 'ENCUADRE LEGAL' },
-                                { key: 'detallesNovedad', label: 'DETALLES DE LA NOVEDAD' }, // Asumo este nombre en el objeto novedad
+                                { key: 'detallesNovedad', label: 'DETALLES DE LA NOVEDAD' },
                                 { key: 'calle', label: 'CALLE' },
                                 { key: 'barrio', label: 'BARRIO' },
                                 { key: 'coordenadas', label: '' }, // Se manejará como Latitud y Longitud
                                 { key: 'lugar', label: 'LUGAR' },
                                 { key: 'bienAfectado', label: 'BIEN AFECTADO' },
                                 { key: 'victima', label: 'DATOS DE LA VICTIMA' },
-                                { key: 'nombreImputado', label: 'DATOS DEL IMPUTADO' }, // Asumo este nombre en el objeto novedad
+                                { key: 'nombreImputado', label: 'DATOS DEL IMPUTADO' },
                                 { key: 'esclarecidos', label: 'ESTADO/SITUACION' }
                             ];
 
@@ -172,12 +172,7 @@
                                 let displayLabel = field.label;
 
                                 if (field.key === 'detallesNovedad' && !displayValue) {
-                                    // Fallback para 'detallesNovedad' si el campo es 'observaciones' en el backend
-                                    displayValue = novedad.observaciones;
-                                }
-                                if (field.key === 'nombreImputado' && !displayValue) {
-                                    // No hay un fallback común para nombreImputado, pero se mantiene la lógica si existiera
-                                    displayValue = novedad.nombreImputado; // Asegurarse de que esté definida en el modelo/data
+                                    displayValue = novedad.observaciones; // Fallback para 'detallesNovedad'
                                 }
 
                                 if (field.key === 'coordenadas') {
@@ -190,7 +185,6 @@
                                         cardContent += `<p><strong>LONGITUD:</strong> N/A</p>`;
                                     }
                                 } else {
-                                    // Para otros campos, mostrar el valor o 'N/A'
                                     const valueToDisplay = (displayValue !== undefined && displayValue !== null && displayValue !== '') ? String(displayValue).toUpperCase() : 'N/A';
                                     cardContent += `<p><strong>${displayLabel}:</strong> ${valueToDisplay}</p>`;
                                 }
@@ -210,7 +204,8 @@
                                 deleteButton.onclick = () => deleteNovedad(novedad.id);
                                 novedadCard.appendChild(deleteButton);
                             }
-                            timeSection.appendChild(novedadCard);
+                            // Ya no hay timeSection, adjuntar directamente a novedadesListDiv
+                            novedadesListDiv.appendChild(novedadCard);
                         });
                     });
                 });
