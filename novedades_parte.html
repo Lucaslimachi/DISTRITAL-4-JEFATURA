@@ -377,9 +377,27 @@
         // Script para el mapa (nuevo)
         var map = L.map('map').setView([-33.5777777778, -69.0172222222], 12); // Coordenadas de Tunuyán, Mendoza, con un zoom adecuado
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        // Definir las capas de mapas
+        const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            name: 'Mapa Callejero'
+        });
+
+        const satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
+            name: 'Vista Satelital'
+        });
+
+        // Agregar la capa por defecto
+        openStreetMap.addTo(map);
+
+        // Crear control de capas
+        const baseMaps = {
+            "Mapa Callejero": openStreetMap,
+            "Vista Satelital": satelliteMap
+        };
+
+        L.control.layers(baseMaps).addTo(map);
 
         var marker;
 
