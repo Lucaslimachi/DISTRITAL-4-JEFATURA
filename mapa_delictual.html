@@ -88,9 +88,33 @@
         document.addEventListener('DOMContentLoaded', function() {
             const map = L.map('delictualMap').setView([-33.5777777778, -69.0172222222], 12); // Centrado en Tunuyán
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+            // Definir las capas de mapas
+            const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                name: 'Mapa Callejero'
+            });
+
+            const satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
+                name: 'Vista Satelital'
+            });
+
+            const terrainMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
+                name: 'Vista de Relieve'
+            });
+
+            // Agregar la capa por defecto
+            openStreetMap.addTo(map);
+
+            // Crear control de capas
+            const baseMaps = {
+                "Mapa Callejero": openStreetMap,
+                "Vista Satelital": satelliteMap,
+                "Vista de Relieve": terrainMap
+            };
+
+            L.control.layers(baseMaps).addTo(map);
 
             let markers = L.featureGroup().addTo(map); // Grupo para gestionar los marcadores
 
