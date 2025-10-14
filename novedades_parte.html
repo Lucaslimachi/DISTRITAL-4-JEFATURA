@@ -156,12 +156,13 @@
                     <div class="coords-display">
                         <div>
                             <label for="latitud">Latitud:</label>
-                            <input type="text" id="latitud" name="latitud" readonly>
+                            <input type="number" id="latitud" name="latitud" step="0.0001" placeholder="Ej: -33.5778">
                         </div>
                         <div>
                             <label for="longitud">Longitud:</label>
-                            <input type="text" id="longitud" name="longitud" readonly>
+                            <input type="number" id="longitud" name="longitud" step="0.0001" placeholder="Ej: -69.0172">
                         </div>
+                        <button type="button" id="actualizarMapaBtn" style="margin-top: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Actualizar Mapa</button>
                     </div>
                 </div>
                 
@@ -474,6 +475,49 @@
             marker = L.marker(e.latlng).addTo(map);
             document.getElementById('latitud').value = e.latlng.lat.toFixed(4);
             document.getElementById('longitud').value = e.latlng.lng.toFixed(4);
+        });
+
+        // Función para actualizar el mapa con coordenadas manuales
+        function actualizarMapaConCoordenadas() {
+            const latitud = parseFloat(document.getElementById('latitud').value);
+            const longitud = parseFloat(document.getElementById('longitud').value);
+            
+            // Validar que las coordenadas sean números válidos
+            if (isNaN(latitud) || isNaN(longitud)) {
+                alert('Por favor, ingrese coordenadas válidas (números).');
+                return;
+            }
+            
+            // Validar rangos de coordenadas (aproximadamente para Argentina)
+            if (latitud < -60 || latitud > -20 || longitud < -80 || longitud > -50) {
+                alert('Las coordenadas están fuera del rango válido para Argentina.');
+                return;
+            }
+            
+            // Actualizar el mapa
+            map.setView([latitud, longitud], 12);
+            
+            // Actualizar o crear el marcador
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker([latitud, longitud]).addTo(map);
+        }
+
+        // Event listener para el botón de actualizar mapa
+        document.getElementById('actualizarMapaBtn').addEventListener('click', actualizarMapaConCoordenadas);
+
+        // Event listeners para actualizar el mapa cuando se cambien las coordenadas manualmente
+        document.getElementById('latitud').addEventListener('change', function() {
+            if (this.value && document.getElementById('longitud').value) {
+                actualizarMapaConCoordenadas();
+            }
+        });
+
+        document.getElementById('longitud').addEventListener('change', function() {
+            if (this.value && document.getElementById('latitud').value) {
+                actualizarMapaConCoordenadas();
+            }
         });
 
         // Añadir el control de geolocalización de Leaflet
