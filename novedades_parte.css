@@ -5,8 +5,8 @@
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 90%; /* Ajustar el ancho para que quepan los dos campos */
-    max-width: 1000px; /* Un ancho máximo razonable */
+    width: 95%; /* Aumentar el ancho del contenedor */
+    max-width: 1400px; /* Aumentar el ancho máximo */
     text-align: center;
     margin-top: 20px;
 }
@@ -14,7 +14,7 @@
 .layout-row {
     grid-column: 1 / -1; /* Ocupa todas las columnas del grid principal */
     display: flex;
-    gap: 15px; /* Espacio entre los dos elementos */
+    gap: 20px; /* Aumentar el espacio entre los elementos */
     align-items: flex-start; /* Alinea los elementos en la parte superior */
     margin-bottom: 15px; /* Margen inferior para separar del siguiente grupo */
 }
@@ -71,7 +71,7 @@
 
 #map {
     border: 1px solid #ddd;
-    height: 300px;
+    height: 400px; /* Aumentar la altura del mapa */
     width: 100%;
     border-radius: 4px;
 }
