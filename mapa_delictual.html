@@ -99,19 +99,13 @@
                 name: 'Vista Satelital'
             });
 
-            const terrainMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-                attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
-                name: 'Vista de Relieve'
-            });
-
             // Agregar la capa por defecto
             openStreetMap.addTo(map);
 
             // Crear control de capas
             const baseMaps = {
                 "Mapa Callejero": openStreetMap,
-                "Vista Satelital": satelliteMap,
-                "Vista de Relieve": terrainMap
+                "Vista Satelital": satelliteMap
             };
 
             L.control.layers(baseMaps).addTo(map);
