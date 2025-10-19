@@ -55,6 +55,7 @@
                         <option value="OFICIAL DE 20">OFICIAL DE 20</option>
                         <option value="OFICIAL DE 65">OFICIAL DE 65</option>
                         <option value="OFICIAL DE 41">OFICIAL DE 41</option>
+                        <option value="OFICIAL MANZANO HISTORICO">OFICIAL MANZANO HISTORICO</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -177,6 +178,13 @@
                 registerUserDashboardBtn.style.display = 'none'; // Ocultar para OFICIAL DE 41
                 viewUsersBtn.style.display = 'none'; // Ocultar para OFICIAL DE 41
                 estadisticasBtn.style.display = 'none'; // Ocultar para OFICIAL DE 41
+            } else if (userRole === 'OFICIAL MANZANO HISTORICO') { // Rol OFICIAL MANZANO HISTORICO
+                novedadesParteBtn.style.display = 'block';
+                verNovedadesBtn.style.display = 'block';
+                mapaDelictualBtn.style.display = 'block'; // Mostrar Mapa Delictual para OFICIAL MANZANO HISTORICO
+                registerUserDashboardBtn.style.display = 'none'; // Ocultar para OFICIAL MANZANO HISTORICO
+                viewUsersBtn.style.display = 'none'; // Ocultar para OFICIAL MANZANO HISTORICO
+                estadisticasBtn.style.display = 'none'; // Ocultar para OFICIAL MANZANO HISTORICO
             } else if (userRole === 'user') { // Rol Invitado
                 novedadesParteBtn.style.display = 'none';
                 verNovedadesBtn.style.display = 'none';
