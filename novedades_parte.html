@@ -533,7 +533,7 @@
             configurarUsuarioOficial15();
         });
 
-        // Función para configurar automáticamente el formulario para OFICIAL DE 15
+        // Función para configurar automáticamente el formulario para OFICIAL DE 15 y OFICIAL DE 20
         function configurarUsuarioOficial15() {
             const token = localStorage.getItem('jwtToken');
             if (!token) return;
@@ -555,6 +555,19 @@
                     setTimeout(() => {
                         const dependenciaSelect = document.getElementById('dependencia');
                         dependenciaSelect.value = 'comisaria_15';
+                    }, 100);
+                } else if (userRole === 'OFICIAL DE 20') {
+                    // Seleccionar automáticamente DEPARTAMENTAL TUPUNGATO
+                    const departamentoSelect = document.getElementById('departamento');
+                    departamentoSelect.value = 'departamental_tupungato';
+                    
+                    // Actualizar las dependencias y seleccionar COMISARIA 20
+                    actualizarDependencias();
+                    
+                    // Esperar un momento para que se actualicen las dependencias
+                    setTimeout(() => {
+                        const dependenciaSelect = document.getElementById('dependencia');
+                        dependenciaSelect.value = 'comisaria_20';
                     }, 100);
                 }
             } catch (error) {
