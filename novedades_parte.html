@@ -608,6 +608,19 @@
                         const dependenciaSelect = document.getElementById('dependencia');
                         dependenciaSelect.value = 'comisaria_41';
                     }, 100);
+                } else if (userRole === 'OFICIAL MANZANO HISTORICO') {
+                    // Seleccionar automáticamente DEPARTAMENTAL TUNUYAN
+                    const departamentoSelect = document.getElementById('departamento');
+                    departamentoSelect.value = 'departamental_tunuyan';
+                    
+                    // Actualizar las dependencias y seleccionar SUBCOMISARIA EL MANZANO
+                    actualizarDependencias();
+                    
+                    // Esperar un momento para que se actualicen las dependencias
+                    setTimeout(() => {
+                        const dependenciaSelect = document.getElementById('dependencia');
+                        dependenciaSelect.value = 'subcomisaria_el_manzano';
+                    }, 100);
                 }
             } catch (error) {
                 console.error('Error al decodificar el token JWT:', error);

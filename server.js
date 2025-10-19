@@ -253,6 +253,11 @@ app.get('/novedades', authenticateToken, async (req, res) => {
       novedades = await Novedad.findAll({
         where: { dependencia: 'comisaria_18' }
       });
+    } else if (req.user.role === 'OFICIAL MANZANO HISTORICO') {
+      // Solo mostrar novedades de Subcomisaría El Manzano
+      novedades = await Novedad.findAll({
+        where: { dependencia: 'subcomisaria_el_manzano' }
+      });
     } else {
       // Para admin y otros roles, mostrar todas las novedades
       novedades = await Novedad.findAll();
@@ -266,7 +271,7 @@ app.get('/novedades', authenticateToken, async (req, res) => {
 });
 
 // Guardar una nueva novedad
-app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18']), async (req, res) => {
+app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18', 'OFICIAL MANZANO HISTORICO']), async (req, res) => {
   const newNovedadData = req.body;
   console.log('BACKEND DEBUG: Datos recibidos para nueva novedad:', newNovedadData); // Añadido para depuración
   try {
@@ -280,7 +285,7 @@ app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficial
 });
 
 // Actualizar una novedad existente
-app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18']), async (req, res) => {
+app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18', 'OFICIAL MANZANO HISTORICO']), async (req, res) => {
   const novedadId = req.params.id;
   const updatedNovedadData = req.body;
 
@@ -303,7 +308,7 @@ app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-ofic
 });
 
 // Eliminar una novedad
-app.delete('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18']), async (req, res) => {
+app.delete('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18', 'OFICIAL MANZANO HISTORICO']), async (req, res) => {
   const novedadId = req.params.id;
 
   try {
@@ -423,12 +428,12 @@ app.get('/user-dashboard', authenticateToken, authorizeRoles(['admin', 'user']),
   res.json({ message: `Bienvenido a tu panel, ${req.user.username}!` });
 });
 
-// Nuevas rutas protegidas para "Usuario-Oficiales", "admin", "OFICIAL DE 15", "OFICIAL DE 20", "OFICIAL DE 65" y "OFICIAL DE 18"
-app.get('/novedades_parte', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18']), (req, res) => {
+// Nuevas rutas protegidas para "Usuario-Oficiales", "admin", "OFICIAL DE 15", "OFICIAL DE 20", "OFICIAL DE 65", "OFICIAL DE 18" y "OFICIAL MANZANO HISTORICO"
+app.get('/novedades_parte', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18', 'OFICIAL MANZANO HISTORICO']), (req, res) => {
   res.json({ message: `Bienvenido a Parte de Novedades, ${req.user.username}!` });
 });
 
-app.get('/ver_novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18']), (req, res) => {
+app.get('/ver_novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18', 'OFICIAL MANZANO HISTORICO']), (req, res) => {
   res.json({ message: `Bienvenido a Ver Partes de Novedades, ${req.user.username}!` });
 });
 

@@ -116,10 +116,14 @@
                 .then(data => {
                     allNovedades = data; // Store fetched data globally
                     
-                    // Filtrar por dependencia comisaría 41 si el usuario es OFICIAL DE 41
+                    // Filtrar por dependencia según el rol del usuario
                     if (userRole === 'OFICIAL DE 41') {
                         allNovedades = allNovedades.filter(novedad => {
                             return novedad.dependencia && novedad.dependencia.includes('41');
+                        });
+                    } else if (userRole === 'OFICIAL MANZANO HISTORICO') {
+                        allNovedades = allNovedades.filter(novedad => {
+                            return novedad.dependencia && novedad.dependencia.includes('subcomisaria_el_manzano');
                         });
                     }
                     
@@ -259,10 +263,14 @@
 
                 let filtered = [...allNovedades];
                 
-                // Aplicar filtro de dependencia 41 si el usuario es OFICIAL DE 41
+                // Aplicar filtro de dependencia según el rol del usuario
                 if (userRole === 'OFICIAL DE 41') {
                     filtered = filtered.filter(novedad => {
                         return novedad.dependencia && novedad.dependencia.includes('41');
+                    });
+                } else if (userRole === 'OFICIAL MANZANO HISTORICO') {
+                    filtered = filtered.filter(novedad => {
+                        return novedad.dependencia && novedad.dependencia.includes('subcomisaria_el_manzano');
                     });
                 }
 
@@ -310,10 +318,15 @@
                 filterImputadoInput.value = '';
                 filterVictimaInput.value = '';
                 
-                // Si es OFICIAL DE 41, mantener el filtro de dependencia 41
+                // Mantener el filtro de dependencia según el rol del usuario
                 if (userRole === 'OFICIAL DE 41') {
                     const filteredByDependency = allNovedades.filter(novedad => {
                         return novedad.dependencia && novedad.dependencia.includes('41');
+                    });
+                    renderNovedades(filteredByDependency);
+                } else if (userRole === 'OFICIAL MANZANO HISTORICO') {
+                    const filteredByDependency = allNovedades.filter(novedad => {
+                        return novedad.dependencia && novedad.dependencia.includes('subcomisaria_el_manzano');
                     });
                     renderNovedades(filteredByDependency);
                 } else {
