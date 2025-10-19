@@ -190,6 +190,15 @@
                 })
                 .then(data => {
                     allNovedades = data; // Store fetched data globally
+                    
+                    // Filtrar por dependencia comisaría 41 si el usuario es OFICIAL DE 41
+                    const userRole = localStorage.getItem('userRole');
+                    if (userRole === 'OFICIAL DE 41') {
+                        allNovedades = allNovedades.filter(novedad => {
+                            return novedad.dependencia && novedad.dependencia.includes('41');
+                        });
+                    }
+                    
                     populateFilters(); // Populate filters with fetched data
                     renderMapMarkers(allNovedades); // Render initial markers
                 })
@@ -316,6 +325,14 @@
                 const filterDayTimeInterval = filterDayTimeIntervalSelect.value; // Nuevo filtro
 
                 let filteredNovedades = [...allNovedades];
+                
+                // Aplicar filtro de dependencia 41 si el usuario es OFICIAL DE 41
+                const userRole = localStorage.getItem('userRole');
+                if (userRole === 'OFICIAL DE 41') {
+                    filteredNovedades = filteredNovedades.filter(novedad => {
+                        return novedad.dependencia && novedad.dependencia.includes('41');
+                    });
+                }
 
                 
                 if (selectedDependencia) {
@@ -386,7 +403,17 @@
                 filterEndDateInput.value = '';
                 filterImputadoMapInput.value = ''; // Limpiar nuevo filtro
                 filterDayTimeIntervalSelect.value = ''; // Limpiar nuevo filtro
-                renderMapMarkers(allNovedades); // Mostrar todas las novedades de nuevo
+                
+                // Si es OFICIAL DE 41, mantener el filtro de dependencia 41
+                const userRole = localStorage.getItem('userRole');
+                if (userRole === 'OFICIAL DE 41') {
+                    const filteredByDependency = allNovedades.filter(novedad => {
+                        return novedad.dependencia && novedad.dependencia.includes('41');
+                    });
+                    renderMapMarkers(filteredByDependency);
+                } else {
+                    renderMapMarkers(allNovedades); // Mostrar todas las novedades de nuevo
+                }
             });
         });
     </script>

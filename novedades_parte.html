@@ -595,6 +595,19 @@
                         const dependenciaSelect = document.getElementById('dependencia');
                         dependenciaSelect.value = 'comisaria_65';
                     }, 100);
+                } else if (userRole === 'OFICIAL DE 41') {
+                    // Seleccionar automáticamente DEPARTAMENTAL SAN CARLOS
+                    const departamentoSelect = document.getElementById('departamento');
+                    departamentoSelect.value = 'departamental_san_carlos';
+                    
+                    // Actualizar las dependencias y seleccionar COMISARIA 41
+                    actualizarDependencias();
+                    
+                    // Esperar un momento para que se actualicen las dependencias
+                    setTimeout(() => {
+                        const dependenciaSelect = document.getElementById('dependencia');
+                        dependenciaSelect.value = 'comisaria_41';
+                    }, 100);
                 }
             } catch (error) {
                 console.error('Error al decodificar el token JWT:', error);
