@@ -124,3 +124,20 @@
     border-radius: 4px;
     cursor: pointer;
 }
+
+/* Estilo para el botón de geolocalización */
+.geolocation-btn {
+    margin-left: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.geolocation-btn:hover {
+    background-color: #45a049;
+}
