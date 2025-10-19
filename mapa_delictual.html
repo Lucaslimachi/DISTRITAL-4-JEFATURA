@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="mapa_delictual.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 <body>
@@ -58,147 +57,12 @@
             <button id="clearMapFiltersBtn">Limpiar Filtros</button>
         </div>
         <div id="delictualMap"></div>
-        <div id="mapLegend" class="map-legend">
-            <h3>Leyenda de Iconos</h3>
-            <div class="legend-item">
-                <div class="legend-icon" style="background-color: #FF6B6B;"><i class="fas fa-hand-holding-usd"></i></div>
-                <span>Robos y Hurtos</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background-color: #8B0000;"><i class="fas fa-skull"></i></div>
-                <span>Homicidios</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background-color: #FF8C00;"><i class="fas fa-user-injured"></i></div>
-                <span>Lesiones</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background-color: #DC143C;"><i class="fas fa-exclamation-triangle"></i></div>
-                <span>Violencia</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background-color: #FF4500;"><i class="fas fa-fire"></i></div>
-                <span>Daños e Incendios</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background-color: #FFD700;"><i class="fas fa-dollar-sign"></i></div>
-                <span>Estafas</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background-color: #8B4513;"><i class="fas fa-crosshairs"></i></div>
-                <span>Armas</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background-color: #9370DB;"><i class="fas fa-pills"></i></div>
-                <span>Drogas</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background-color: #4169E1;"><i class="fas fa-car"></i></div>
-                <span>Vehículos</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background-color: #696969;"><i class="fas fa-exclamation-circle"></i></div>
-                <span>Otros</span>
-            </div>
-        </div>
         <button onclick="window.history.back()">Volver a la página anterior</button>
     </div>
 
     <script>
         const API_BASE_URL = 'https://distrital-4-jefatura.onrender.com'; // Define the API base URL
         let allNovedades = []; // Variable global para almacenar todas las novedades
-
-        // Función para obtener icono según el encuadre legal
-        function getIconForEncuadreLegal(encuadreLegal) {
-            const encuadre = encuadreLegal ? encuadreLegal.toUpperCase() : '';
-            
-            // Definir iconos y colores para diferentes tipos de delitos
-            if (encuadre.includes('ROBO') || encuadre.includes('HURTO')) {
-                return {
-                    icon: 'fas fa-hand-holding-usd',
-                    color: '#FF6B6B', // Rojo para robos
-                    size: 25
-                };
-            } else if (encuadre.includes('HOMICIDIO') || encuadre.includes('MUERTE')) {
-                return {
-                    icon: 'fas fa-skull',
-                    color: '#8B0000', // Rojo oscuro para homicidios
-                    size: 30
-                };
-            } else if (encuadre.includes('LESIONES')) {
-                return {
-                    icon: 'fas fa-user-injured',
-                    color: '#FF8C00', // Naranja para lesiones
-                    size: 25
-                };
-            } else if (encuadre.includes('VIOLENCIA') || encuadre.includes('ABUSO SEXUAL')) {
-                return {
-                    icon: 'fas fa-exclamation-triangle',
-                    color: '#DC143C', // Rojo carmesí para violencia
-                    size: 28
-                };
-            } else if (encuadre.includes('DAÑO') || encuadre.includes('INCENDIO')) {
-                return {
-                    icon: 'fas fa-fire',
-                    color: '#FF4500', // Rojo naranja para daños
-                    size: 25
-                };
-            } else if (encuadre.includes('ESTAFA') || encuadre.includes('EXTORSION')) {
-                return {
-                    icon: 'fas fa-dollar-sign',
-                    color: '#FFD700', // Dorado para estafas
-                    size: 25
-                };
-            } else if (encuadre.includes('TENENCIA') || encuadre.includes('ARMA')) {
-                return {
-                    icon: 'fas fa-crosshairs',
-                    color: '#8B4513', // Marrón para armas
-                    size: 25
-                };
-            } else if (encuadre.includes('DROGA') || encuadre.includes('TRAFICO')) {
-                return {
-                    icon: 'fas fa-pills',
-                    color: '#9370DB', // Púrpura para drogas
-                    size: 25
-                };
-            } else if (encuadre.includes('VEHICULO') || encuadre.includes('BICICLETA') || encuadre.includes('MOTOVEHICULO')) {
-                return {
-                    icon: 'fas fa-car',
-                    color: '#4169E1', // Azul real para vehículos
-                    size: 25
-                };
-            } else {
-                // Icono por defecto para otros casos
-                return {
-                    icon: 'fas fa-exclamation-circle',
-                    color: '#696969', // Gris para otros
-                    size: 22
-                };
-            }
-        }
-
-        // Función para crear icono personalizado de Leaflet
-        function createCustomIcon(iconData) {
-            return L.divIcon({
-                html: `<div style="
-                    background-color: ${iconData.color};
-                    border: 2px solid white;
-                    border-radius: 50%;
-                    width: ${iconData.size}px;
-                    height: ${iconData.size}px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                ">
-                    <i class="${iconData.icon}" style="color: white; font-size: ${iconData.size * 0.6}px;"></i>
-                </div>`,
-                className: 'custom-div-icon',
-                iconSize: [iconData.size, iconData.size],
-                iconAnchor: [iconData.size / 2, iconData.size / 2],
-                popupAnchor: [0, -iconData.size / 2]
-            });
-        }
 
         // Definición de los campos deseados para los popups del mapa
         const desiredFieldsMap = [
@@ -385,11 +249,7 @@
                                 }
                             });
 
-                            // Obtener icono personalizado según el encuadre legal
-                            const iconData = getIconForEncuadreLegal(novedad.encuadreLegal);
-                            const customIcon = createCustomIcon(iconData);
-                            
-                            L.marker(latlng, { icon: customIcon }).addTo(markers)
+                            L.marker(latlng).addTo(markers)
                                 .bindPopup(popupContent);
                         }
                     }
