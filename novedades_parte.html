@@ -159,7 +159,6 @@
                             <input type="number" id="longitud" name="longitud" step="0.0001" placeholder="Ej: -69.0172">
                         </div>
                         <button type="button" id="actualizarMapaBtn">Actualizar Mapa</button>
-                        <button type="button" id="solicitarUbicacionBtn" class="geolocation-btn">📍 Obtener Mi Ubicación</button>
                     </div>
                 </div>
                 
@@ -654,55 +653,6 @@
         // Event listener para el botón de actualizar mapa
         document.getElementById('actualizarMapaBtn').addEventListener('click', actualizarMapaConCoordenadas);
 
-        // Event listener para el botón de solicitar ubicación manual
-        document.getElementById('solicitarUbicacionBtn').addEventListener('click', function() {
-            if (navigator.geolocation) {
-                // Mostrar mensaje de solicitud de permiso
-                if (confirm('Este botón solicitará acceso a tu ubicación. ¿Deseas continuar?')) {
-                    navigator.geolocation.getCurrentPosition(
-                        function(position) {
-                            // Éxito: actualizar coordenadas
-                            const lat = position.coords.latitude;
-                            const lng = position.coords.longitude;
-                            
-                            document.getElementById('latitud').value = lat.toFixed(4);
-                            document.getElementById('longitud').value = lng.toFixed(4);
-                            
-                            // Actualizar mapa
-                            actualizarMapaConCoordenadas();
-                            
-                            alert('Ubicación obtenida exitosamente!');
-                        },
-                        function(error) {
-                            // Error: mostrar mensaje específico
-                            let errorMessage = '';
-                            switch(error.code) {
-                                case error.PERMISSION_DENIED:
-                                    errorMessage = 'Permiso de geolocalización denegado. Por favor, permite el acceso a tu ubicación en la configuración del navegador.';
-                                    break;
-                                case error.POSITION_UNAVAILABLE:
-                                    errorMessage = 'Ubicación no disponible. Verifica que el GPS esté activado.';
-                                    break;
-                                case error.TIMEOUT:
-                                    errorMessage = 'Tiempo de espera agotado. Intenta nuevamente.';
-                                    break;
-                                default:
-                                    errorMessage = 'Error al obtener tu ubicación: ' + error.message;
-                                    break;
-                            }
-                            alert(errorMessage);
-                        },
-                        {
-                            enableHighAccuracy: true,
-                            timeout: 10000,
-                            maximumAge: 60000
-                        }
-                    );
-                }
-            } else {
-                alert('La geolocalización no está soportada por este navegador.');
-            }
-        });
 
         // Event listeners para actualizar el mapa cuando se cambien las coordenadas manualmente
         document.getElementById('latitud').addEventListener('change', function() {
