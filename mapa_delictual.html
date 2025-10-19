@@ -201,6 +201,10 @@
                         allNovedades = allNovedades.filter(novedad => {
                             return novedad.dependencia && novedad.dependencia.includes('subcomisaria_el_manzano');
                         });
+                    } else if (userRole === 'OFICIAL CORDON DEL PLATA') {
+                        allNovedades = allNovedades.filter(novedad => {
+                            return novedad.dependencia && novedad.dependencia.includes('subcomisaria_cordon_del_plata');
+                        });
                     }
                     
                     populateFilters(); // Populate filters with fetched data
@@ -340,6 +344,10 @@
                     filteredNovedades = filteredNovedades.filter(novedad => {
                         return novedad.dependencia && novedad.dependencia.includes('subcomisaria_el_manzano');
                     });
+                } else if (userRole === 'OFICIAL CORDON DEL PLATA') {
+                    filteredNovedades = filteredNovedades.filter(novedad => {
+                        return novedad.dependencia && novedad.dependencia.includes('subcomisaria_cordon_del_plata');
+                    });
                 }
 
                 
@@ -422,6 +430,11 @@
                 } else if (userRole === 'OFICIAL MANZANO HISTORICO') {
                     const filteredByDependency = allNovedades.filter(novedad => {
                         return novedad.dependencia && novedad.dependencia.includes('subcomisaria_el_manzano');
+                    });
+                    renderMapMarkers(filteredByDependency);
+                } else if (userRole === 'OFICIAL CORDON DEL PLATA') {
+                    const filteredByDependency = allNovedades.filter(novedad => {
+                        return novedad.dependencia && novedad.dependencia.includes('subcomisaria_cordon_del_plata');
                     });
                     renderMapMarkers(filteredByDependency);
                 } else {

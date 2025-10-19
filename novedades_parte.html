@@ -621,6 +621,19 @@
                         const dependenciaSelect = document.getElementById('dependencia');
                         dependenciaSelect.value = 'subcomisaria_el_manzano';
                     }, 100);
+                } else if (userRole === 'OFICIAL CORDON DEL PLATA') {
+                    // Seleccionar automáticamente DEPARTAMENTAL TUPUNGATO
+                    const departamentoSelect = document.getElementById('departamento');
+                    departamentoSelect.value = 'departamental_tupungato';
+                    
+                    // Actualizar las dependencias y seleccionar SUBCOMISARIA CORDON DEL PLATA
+                    actualizarDependencias();
+                    
+                    // Esperar un momento para que se actualicen las dependencias
+                    setTimeout(() => {
+                        const dependenciaSelect = document.getElementById('dependencia');
+                        dependenciaSelect.value = 'subcomisaria_cordon_del_plata';
+                    }, 100);
                 }
             } catch (error) {
                 console.error('Error al decodificar el token JWT:', error);
