@@ -666,37 +666,43 @@
             }
         });
 
-        // Añadir el control de geolocalización de Leaflet
-        L.control.locate({
-            position: 'topleft',
-            strings: {
-                title: "Localizar mi ubicación"
-            },
-            locateOptions: {
-                maxZoom: 16
-            },
-            onLocationError: function(err) {
-                alert(err.message);
-            },
-            onLocationOutsideMapBounds: function(lc) {
-                lc.stop();
-                alert("Tu ubicación está fuera del área del mapa actual.");
-            },
-            flyTo: true, // Animación para volar a la ubicación
-            showPopup: false, // No mostrar un popup por defecto
-            drawCircle: false, // No dibujar un círculo de precisión
-            onLocationFound: function(e) {
-                // Al encontrar la ubicación, actualizar los campos de latitud y longitud
-                document.getElementById('latitud').value = e.latitude.toFixed(4);
-                document.getElementById('longitud').value = e.longitude.toFixed(4);
+        // Añadir el control de geolocalización de Leaflet después de que el mapa esté completamente inicializado
+        setTimeout(() => {
+            L.control.locate({
+                position: 'topleft',
+                strings: {
+                    title: "Localizar mi ubicación"
+                },
+                locateOptions: {
+                    maxZoom: 16,
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                },
+                onLocationError: function(err) {
+                    console.error('Error de geolocalización:', err);
+                    alert('Error al obtener tu ubicación: ' + err.message);
+                },
+                onLocationOutsideMapBounds: function(lc) {
+                    lc.stop();
+                    alert("Tu ubicación está fuera del área del mapa actual.");
+                },
+                flyTo: true, // Animación para volar a la ubicación
+                showPopup: false, // No mostrar un popup por defecto
+                drawCircle: false, // No dibujar un círculo de precisión
+                onLocationFound: function(e) {
+                    // Al encontrar la ubicación, actualizar los campos de latitud y longitud
+                    document.getElementById('latitud').value = e.latitude.toFixed(4);
+                    document.getElementById('longitud').value = e.longitude.toFixed(4);
 
-                // También colocar un marcador si no hay uno o actualizar el existente
-                if (marker) {
-                    map.removeLayer(marker);
+                    // También colocar un marcador si no hay uno o actualizar el existente
+                    if (marker) {
+                        map.removeLayer(marker);
+                    }
+                    marker = L.marker(e.latlng).addTo(map);
                 }
-                marker = L.marker(e.latlng).addTo(map);
-            }
-        }).addTo(map);
+            }).addTo(map);
+        }, 100);
     </script>
 </body>
 </html>
