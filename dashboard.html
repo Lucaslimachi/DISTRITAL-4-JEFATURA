@@ -138,6 +138,13 @@
                 registerUserDashboardBtn.style.display = 'none'; // Ocultar para oficiales
                 viewUsersBtn.style.display = 'none'; // Ocultar para oficiales
                 estadisticasBtn.style.display = 'none'; // Ocultar para oficiales
+            } else if (userRole === 'OFICIAL DE 15') { // Rol OFICIAL DE 15
+                novedadesParteBtn.style.display = 'block';
+                verNovedadesBtn.style.display = 'block';
+                mapaDelictualBtn.style.display = 'block'; // Mostrar Mapa Delictual para OFICIAL DE 15
+                registerUserDashboardBtn.style.display = 'none'; // Ocultar para OFICIAL DE 15
+                viewUsersBtn.style.display = 'none'; // Ocultar para OFICIAL DE 15
+                estadisticasBtn.style.display = 'none'; // Ocultar para OFICIAL DE 15
             } else if (userRole === 'user') { // Rol Invitado
                 novedadesParteBtn.style.display = 'none';
                 verNovedadesBtn.style.display = 'none';
