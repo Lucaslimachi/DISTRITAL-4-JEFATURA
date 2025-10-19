@@ -533,7 +533,7 @@
             configurarUsuarioOficial15();
         });
 
-        // Función para configurar automáticamente el formulario para OFICIAL DE 15 y OFICIAL DE 20
+        // Función para configurar automáticamente el formulario para OFICIAL DE 15, OFICIAL DE 20 y OFICIAL DE 65
         function configurarUsuarioOficial15() {
             const token = localStorage.getItem('jwtToken');
             if (!token) return;
@@ -568,6 +568,19 @@
                     setTimeout(() => {
                         const dependenciaSelect = document.getElementById('dependencia');
                         dependenciaSelect.value = 'comisaria_20';
+                    }, 100);
+                } else if (userRole === 'OFICIAL DE 65') {
+                    // Seleccionar automáticamente DEPARTAMENTAL TUNUYAN
+                    const departamentoSelect = document.getElementById('departamento');
+                    departamentoSelect.value = 'departamental_tunuyan';
+                    
+                    // Actualizar las dependencias y seleccionar COMISARIA 65
+                    actualizarDependencias();
+                    
+                    // Esperar un momento para que se actualicen las dependencias
+                    setTimeout(() => {
+                        const dependenciaSelect = document.getElementById('dependencia');
+                        dependenciaSelect.value = 'comisaria_65';
                     }, 100);
                 }
             } catch (error) {
