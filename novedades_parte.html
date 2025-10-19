@@ -217,6 +217,81 @@
     <script>
         const API_BASE_URL = 'https://distrital-4-jefatura.onrender.com'; // Define the API base URL
 
+        // Script para manejar dependencias según departamento
+        document.addEventListener('DOMContentLoaded', function() {
+            const departamentoSelect = document.getElementById('departamento');
+            const dependenciaSelect = document.getElementById('dependencia');
+            
+            // Definir las dependencias por departamento
+            const dependenciasPorDepartamento = {
+                'departamental_tupungato': [
+                    { value: 'comisaria_18', text: 'COMISARIA 18' },
+                    { value: 'comisaria_20', text: 'COMISARIA 20' },
+                    { value: 'comisaria_41', text: 'COMISARIA 41' },
+                    { value: 'subcomisaria_cordon_del_plata', text: 'SUBCOMISARIA CORDON DEL PLATA' },
+                    { value: 'subcomisaria_san_jose', text: 'SUBCOMISARIA SAN JOSE' }
+                ],
+                'departamental_tunuyan': [
+                    { value: 'comisaria_15', text: 'COMISARIA 15' },
+                    { value: 'comisaria_65', text: 'COMISARIA 65' },
+                    { value: 'subcomisaria_el_manzano', text: 'SUBCOMISARIA EL MANZANO' }
+                ],
+                'departamental_san_carlos': [
+                    { value: 'comisaria_15', text: 'COMISARIA 15' },
+                    { value: 'comisaria_18', text: 'COMISARIA 18' },
+                    { value: 'comisaria_20', text: 'COMISARIA 20' },
+                    { value: 'comisaria_41', text: 'COMISARIA 41' },
+                    { value: 'comisaria_65', text: 'COMISARIA 65' },
+                    { value: 'subcomisaria_cordon_del_plata', text: 'SUBCOMISARIA CORDON DEL PLATA' },
+                    { value: 'subcomisaria_san_jose', text: 'SUBCOMISARIA SAN JOSE' },
+                    { value: 'subcomisaria_el_manzano', text: 'SUBCOMISARIA EL MANZANO' }
+                ]
+            };
+            
+            // Función para actualizar las opciones de dependencia
+            function actualizarDependencias() {
+                const departamentoSeleccionado = departamentoSelect.value;
+                
+                // Limpiar opciones existentes
+                dependenciaSelect.innerHTML = '<option value="">Seleccione una dependencia</option>';
+                
+                // Agregar opciones según el departamento seleccionado
+                if (departamentoSeleccionado && dependenciasPorDepartamento[departamentoSeleccionado]) {
+                    dependenciasPorDepartamento[departamentoSeleccionado].forEach(dep => {
+                        const option = document.createElement('option');
+                        option.value = dep.value;
+                        option.textContent = dep.text;
+                        dependenciaSelect.appendChild(option);
+                    });
+                } else {
+                    // Si no hay departamento seleccionado, mostrar todas las dependencias
+                    const todasLasDependencias = [
+                        { value: 'comisaria_15', text: 'COMISARIA 15' },
+                        { value: 'comisaria_18', text: 'COMISARIA 18' },
+                        { value: 'comisaria_20', text: 'COMISARIA 20' },
+                        { value: 'comisaria_41', text: 'COMISARIA 41' },
+                        { value: 'comisaria_65', text: 'COMISARIA 65' },
+                        { value: 'subcomisaria_cordon_del_plata', text: 'SUBCOMISARIA CORDON DEL PLATA' },
+                        { value: 'subcomisaria_san_jose', text: 'SUBCOMISARIA SAN JOSE' },
+                        { value: 'subcomisaria_el_manzano', text: 'SUBCOMISARIA EL MANZANO' }
+                    ];
+                    
+                    todasLasDependencias.forEach(dep => {
+                        const option = document.createElement('option');
+                        option.value = dep.value;
+                        option.textContent = dep.text;
+                        dependenciaSelect.appendChild(option);
+                    });
+                }
+            }
+            
+            // Event listener para cuando cambie el departamento
+            departamentoSelect.addEventListener('change', actualizarDependencias);
+            
+            // Inicializar dependencias al cargar la página
+            actualizarDependencias();
+        });
+
         // Script para autocompletar fecha y hora al guardar (ya existente)
         document.querySelector('.form-container form').addEventListener('submit', function(event) {
             event.preventDefault();
