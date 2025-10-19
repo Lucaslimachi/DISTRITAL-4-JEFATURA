@@ -230,7 +230,19 @@ function authorizeRoles(roles) {
 // Obtener todas las novedades
 app.get('/novedades', authenticateToken, async (req, res) => {
   try {
-    const novedades = await Novedad.findAll();
+    let novedades;
+    
+    // Filtrar novedades según el rol del usuario
+    if (req.user.role === 'OFICIAL DE 15') {
+      // Solo mostrar novedades de Comisaría 15
+      novedades = await Novedad.findAll({
+        where: { dependencia: 'comisaria_15' }
+      });
+    } else {
+      // Para admin y otros roles, mostrar todas las novedades
+      novedades = await Novedad.findAll();
+    }
+    
     res.json(novedades);
   } catch (error) {
     console.error('BACKEND DEBUG: Error al obtener novedades:', error);
@@ -239,7 +251,7 @@ app.get('/novedades', authenticateToken, async (req, res) => {
 });
 
 // Guardar una nueva novedad
-app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), async (req, res) => {
+app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15']), async (req, res) => {
   const newNovedadData = req.body;
   console.log('BACKEND DEBUG: Datos recibidos para nueva novedad:', newNovedadData); // Añadido para depuración
   try {
@@ -253,7 +265,7 @@ app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficial
 });
 
 // Actualizar una novedad existente
-app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), async (req, res) => {
+app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15']), async (req, res) => {
   const novedadId = req.params.id;
   const updatedNovedadData = req.body;
 
@@ -276,7 +288,7 @@ app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-ofic
 });
 
 // Eliminar una novedad
-app.delete('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), async (req, res) => {
+app.delete('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15']), async (req, res) => {
   const novedadId = req.params.id;
 
   try {
@@ -396,12 +408,12 @@ app.get('/user-dashboard', authenticateToken, authorizeRoles(['admin', 'user']),
   res.json({ message: `Bienvenido a tu panel, ${req.user.username}!` });
 });
 
-// Nuevas rutas protegidas para "Usuario-Oficiales" y "admin"
-app.get('/novedades_parte', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), (req, res) => {
+// Nuevas rutas protegidas para "Usuario-Oficiales", "admin" y "OFICIAL DE 15"
+app.get('/novedades_parte', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15']), (req, res) => {
   res.json({ message: `Bienvenido a Parte de Novedades, ${req.user.username}!` });
 });
 
-app.get('/ver_novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales']), (req, res) => {
+app.get('/ver_novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15']), (req, res) => {
   res.json({ message: `Bienvenido a Ver Partes de Novedades, ${req.user.username}!` });
 });
 

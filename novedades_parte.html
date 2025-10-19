@@ -528,7 +528,39 @@
             // Agregar event listener para cambio de departamento
             const departamentoSelect = document.getElementById('departamento');
             departamentoSelect.addEventListener('change', actualizarDependencias);
+            
+            // Configurar automáticamente para usuarios OFICIAL DE 15
+            configurarUsuarioOficial15();
         });
+
+        // Función para configurar automáticamente el formulario para OFICIAL DE 15
+        function configurarUsuarioOficial15() {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) return;
+            
+            try {
+                // Decodificar el token JWT para obtener el rol del usuario
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userRole = payload.role;
+                
+                if (userRole === 'OFICIAL DE 15') {
+                    // Seleccionar automáticamente DEPARTAMENTAL TUNUYAN
+                    const departamentoSelect = document.getElementById('departamento');
+                    departamentoSelect.value = 'departamental_tunuyan';
+                    
+                    // Actualizar las dependencias y seleccionar COMISARIA 15
+                    actualizarDependencias();
+                    
+                    // Esperar un momento para que se actualicen las dependencias
+                    setTimeout(() => {
+                        const dependenciaSelect = document.getElementById('dependencia');
+                        dependenciaSelect.value = 'comisaria_15';
+                    }, 100);
+                }
+            } catch (error) {
+                console.error('Error al decodificar el token JWT:', error);
+            }
+        }
 
         map.on('click', function(e) {
             if (marker) {
