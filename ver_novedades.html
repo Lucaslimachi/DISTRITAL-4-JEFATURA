@@ -115,6 +115,14 @@
                 })
                 .then(data => {
                     allNovedades = data; // Store fetched data globally
+                    
+                    // Filtrar por dependencia comisaría 41 si el usuario es OFICIAL DE 41
+                    if (userRole === 'OFICIAL DE 41') {
+                        allNovedades = allNovedades.filter(novedad => {
+                            return novedad.dependencia && novedad.dependencia.includes('41');
+                        });
+                    }
+                    
                     populateFilters(allNovedades);
                     renderNovedades(allNovedades); // Render all initially
                 })
@@ -250,6 +258,13 @@
                 const filterVictima = filterVictimaInput.value.toLowerCase();
 
                 let filtered = [...allNovedades];
+                
+                // Aplicar filtro de dependencia 41 si el usuario es OFICIAL DE 41
+                if (userRole === 'OFICIAL DE 41') {
+                    filtered = filtered.filter(novedad => {
+                        return novedad.dependencia && novedad.dependencia.includes('41');
+                    });
+                }
 
                 if (filterDate) {
                     filtered = filtered.filter(novedad => (novedad.fechaDelHecho || novedad.fechaCarga) === filterDate);
@@ -294,7 +309,16 @@
                 filterTipoDependenciaSelect.value = '';
                 filterImputadoInput.value = '';
                 filterVictimaInput.value = '';
-                renderNovedades(allNovedades); // Renderizar todas las novedades
+                
+                // Si es OFICIAL DE 41, mantener el filtro de dependencia 41
+                if (userRole === 'OFICIAL DE 41') {
+                    const filteredByDependency = allNovedades.filter(novedad => {
+                        return novedad.dependencia && novedad.dependencia.includes('41');
+                    });
+                    renderNovedades(filteredByDependency);
+                } else {
+                    renderNovedades(allNovedades); // Renderizar todas las novedades
+                }
             });
 
             downloadPdfBtn.addEventListener('click', function() {

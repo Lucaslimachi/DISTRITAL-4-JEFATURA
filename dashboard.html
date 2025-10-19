@@ -54,6 +54,7 @@
                         <option value="OFICIAL DE 18">OFICIAL DE 18</option>
                         <option value="OFICIAL DE 20">OFICIAL DE 20</option>
                         <option value="OFICIAL DE 65">OFICIAL DE 65</option>
+                        <option value="OFICIAL DE 41">OFICIAL DE 41</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -169,6 +170,13 @@
                 registerUserDashboardBtn.style.display = 'none'; // Ocultar para OFICIAL DE 18
                 viewUsersBtn.style.display = 'none'; // Ocultar para OFICIAL DE 18
                 estadisticasBtn.style.display = 'none'; // Ocultar para OFICIAL DE 18
+            } else if (userRole === 'OFICIAL DE 41') { // Rol OFICIAL DE 41
+                novedadesParteBtn.style.display = 'block';
+                verNovedadesBtn.style.display = 'block';
+                mapaDelictualBtn.style.display = 'block'; // Mostrar Mapa Delictual para OFICIAL DE 41
+                registerUserDashboardBtn.style.display = 'none'; // Ocultar para OFICIAL DE 41
+                viewUsersBtn.style.display = 'none'; // Ocultar para OFICIAL DE 41
+                estadisticasBtn.style.display = 'none'; // Ocultar para OFICIAL DE 41
             } else if (userRole === 'user') { // Rol Invitado
                 novedadesParteBtn.style.display = 'none';
                 verNovedadesBtn.style.display = 'none';
