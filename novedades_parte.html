@@ -533,7 +533,7 @@
             configurarUsuarioOficial15();
         });
 
-        // Función para configurar automáticamente el formulario para OFICIAL DE 15, OFICIAL DE 20 y OFICIAL DE 65
+        // Función para configurar automáticamente el formulario para OFICIAL DE 15, OFICIAL DE 18, OFICIAL DE 20 y OFICIAL DE 65
         function configurarUsuarioOficial15() {
             const token = localStorage.getItem('jwtToken');
             if (!token) return;
@@ -555,6 +555,19 @@
                     setTimeout(() => {
                         const dependenciaSelect = document.getElementById('dependencia');
                         dependenciaSelect.value = 'comisaria_15';
+                    }, 100);
+                } else if (userRole === 'OFICIAL DE 18') {
+                    // Seleccionar automáticamente DEPARTAMENTAL SAN CARLOS
+                    const departamentoSelect = document.getElementById('departamento');
+                    departamentoSelect.value = 'departamental_san_carlos';
+                    
+                    // Actualizar las dependencias y seleccionar COMISARIA 18
+                    actualizarDependencias();
+                    
+                    // Esperar un momento para que se actualicen las dependencias
+                    setTimeout(() => {
+                        const dependenciaSelect = document.getElementById('dependencia');
+                        dependenciaSelect.value = 'comisaria_18';
                     }, 100);
                 } else if (userRole === 'OFICIAL DE 20') {
                     // Seleccionar automáticamente DEPARTAMENTAL TUPUNGATO
