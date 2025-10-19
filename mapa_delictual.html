@@ -112,6 +112,46 @@
 
             let markers = L.featureGroup().addTo(map); // Grupo para gestionar los marcadores
 
+            // Función para obtener el icono según el encuadre legal
+            function getIconForEncuadreLegal(encuadreLegal) {
+                const iconMap = {
+                    'ABIGEATO': 'imagenes/ABIGEATO.png',
+                    'ROBO': 'imagenes/ROBO.png',
+                    'HURTO': 'imagenes/HURTO.png',
+                    'HOMICIDIO': 'imagenes/HOMICIDIO.png',
+                    'DAÑO': 'imagenes/DAÑO.png',
+                    'INCENDIO': 'imagenes/INCENDIO.png',
+                    'ESTAFA': 'imagenes/ESTAFA.png',
+                    'VIOLENCIADE GENERO': 'imagenes/VG.png',
+                    'ROBO AGRAVADO': 'imagenes/AGRAVADO.png',
+                    'HURTO AGRAVADO': 'imagenes/AGRAVADO.png',
+                    'ROBO DE VEHICULO': 'imagenes/AUTO.png',
+                    'HURTO DE VEHICULO': 'imagenes/AUTO.png',
+                    'ROBO DE MOTOVEHICULO': 'imagenes/MOTO.png',
+                    'HURTO DE MOTOVEHICULO': 'imagenes/MOTO.png',
+                    'ROBO DE BICICLETA': 'imagenes/BICICLETA.png',
+                    'HURTO DE BICICLETA': 'imagenes/BICICLETA.png'
+                };
+
+                const iconPath = iconMap[encuadreLegal];
+                if (iconPath) {
+                    return L.icon({
+                        iconUrl: iconPath,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16],
+                        popupAnchor: [0, -16]
+                    });
+                }
+                
+                // Icono por defecto si no se encuentra uno específico
+                return L.icon({
+                    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34]
+                });
+            }
+
             // Referencias a los elementos del DOM de los filtros
             
             const filterDependenciaSelect = document.getElementById('filterDependencia');
@@ -249,7 +289,10 @@
                                 }
                             });
 
-                            L.marker(latlng).addTo(markers)
+                            // Obtener el icono apropiado según el encuadre legal
+                            const customIcon = getIconForEncuadreLegal(novedad.encuadreLegal);
+                            
+                            L.marker(latlng, { icon: customIcon }).addTo(markers)
                                 .bindPopup(popupContent);
                         }
                     }
