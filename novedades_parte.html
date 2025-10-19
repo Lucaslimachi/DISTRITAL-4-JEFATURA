@@ -38,15 +38,7 @@
             <div class="input-group">
                 <label for="dependencia">DEPENDENCIA:</label>
                 <select id="dependencia" name="dependencia" required>
-                    <option value="">Seleccione una dependencia</option>
-                    <option value="comisaria_15">COMISARIA 15</option>
-                    <option value="comisaria_18">COMISARIA 18</option>
-                    <option value="comisaria_20">COMISARIA 20</option>
-                    <option value="comisaria_41">COMISARIA 41</option>
-                    <option value="comisaria_65">COMISARIA 65</option>
-                    <option value="subcomisaria_cordon_del_plata">SUBCOMISARIA CORDON DEL PLATA</option>
-                    <option value="subcomisaria_san_jose">SUBCOMISARIA SAN JOSE</option>
-                    <option value="subcomisaria_el_manzano">SUBCOMISARIA EL MANZANO</option>
+                    <option value="">Seleccione primero un departamento</option>
                 </select>
             </div>
             <div class="input-group">
@@ -217,80 +209,45 @@
     <script>
         const API_BASE_URL = 'https://distrital-4-jefatura.onrender.com'; // Define the API base URL
 
-        // Script para manejar dependencias según departamento
-        document.addEventListener('DOMContentLoaded', function() {
+        // Mapeo de departamentos a dependencias
+        const departamentoDependencias = {
+            'departamental_tunuyan': [
+                { value: 'comisaria_15', text: 'COMISARIA 15' },
+                { value: 'comisaria_65', text: 'COMISARIA 65' },
+                { value: 'subcomisaria_el_manzano', text: 'SUBCOMISARIA EL MANZANO' }
+            ],
+            'departamental_san_carlos': [
+                { value: 'comisaria_18', text: 'COMISARIA 18' },
+                { value: 'comisaria_41', text: 'COMISARIA 41' }
+            ],
+            'departamental_tupungato': [
+                { value: 'comisaria_20', text: 'COMISARIA 20' },
+                { value: 'subcomisaria_cordon_del_plata', text: 'SUBCOMISARIA CORDON DEL PLATA' },
+                { value: 'subcomisaria_san_jose', text: 'SUBCOMISARIA SAN JOSE' }
+            ]
+        };
+
+        // Función para actualizar las opciones de dependencia
+        function actualizarDependencias() {
             const departamentoSelect = document.getElementById('departamento');
             const dependenciaSelect = document.getElementById('dependencia');
             
-            // Definir las dependencias por departamento
-            const dependenciasPorDepartamento = {
-                'departamental_tupungato': [
-                    { value: 'comisaria_18', text: 'COMISARIA 18' },
-                    { value: 'comisaria_20', text: 'COMISARIA 20' },
-                    { value: 'comisaria_41', text: 'COMISARIA 41' },
-                    { value: 'subcomisaria_cordon_del_plata', text: 'SUBCOMISARIA CORDON DEL PLATA' },
-                    { value: 'subcomisaria_san_jose', text: 'SUBCOMISARIA SAN JOSE' }
-                ],
-                'departamental_tunuyan': [
-                    { value: 'comisaria_15', text: 'COMISARIA 15' },
-                    { value: 'comisaria_65', text: 'COMISARIA 65' },
-                    { value: 'subcomisaria_el_manzano', text: 'SUBCOMISARIA EL MANZANO' }
-                ],
-                'departamental_san_carlos': [
-                    { value: 'comisaria_15', text: 'COMISARIA 15' },
-                    { value: 'comisaria_18', text: 'COMISARIA 18' },
-                    { value: 'comisaria_20', text: 'COMISARIA 20' },
-                    { value: 'comisaria_41', text: 'COMISARIA 41' },
-                    { value: 'comisaria_65', text: 'COMISARIA 65' },
-                    { value: 'subcomisaria_cordon_del_plata', text: 'SUBCOMISARIA CORDON DEL PLATA' },
-                    { value: 'subcomisaria_san_jose', text: 'SUBCOMISARIA SAN JOSE' },
-                    { value: 'subcomisaria_el_manzano', text: 'SUBCOMISARIA EL MANZANO' }
-                ]
-            };
+            // Limpiar opciones actuales
+            dependenciaSelect.innerHTML = '<option value="">Seleccione una dependencia</option>';
             
-            // Función para actualizar las opciones de dependencia
-            function actualizarDependencias() {
-                const departamentoSeleccionado = departamentoSelect.value;
+            const departamentoSeleccionado = departamentoSelect.value;
+            
+            if (departamentoSeleccionado && departamentoDependencias[departamentoSeleccionado]) {
+                const dependencias = departamentoDependencias[departamentoSeleccionado];
                 
-                // Limpiar opciones existentes
-                dependenciaSelect.innerHTML = '<option value="">Seleccione una dependencia</option>';
-                
-                // Agregar opciones según el departamento seleccionado
-                if (departamentoSeleccionado && dependenciasPorDepartamento[departamentoSeleccionado]) {
-                    dependenciasPorDepartamento[departamentoSeleccionado].forEach(dep => {
-                        const option = document.createElement('option');
-                        option.value = dep.value;
-                        option.textContent = dep.text;
-                        dependenciaSelect.appendChild(option);
-                    });
-                } else {
-                    // Si no hay departamento seleccionado, mostrar todas las dependencias
-                    const todasLasDependencias = [
-                        { value: 'comisaria_15', text: 'COMISARIA 15' },
-                        { value: 'comisaria_18', text: 'COMISARIA 18' },
-                        { value: 'comisaria_20', text: 'COMISARIA 20' },
-                        { value: 'comisaria_41', text: 'COMISARIA 41' },
-                        { value: 'comisaria_65', text: 'COMISARIA 65' },
-                        { value: 'subcomisaria_cordon_del_plata', text: 'SUBCOMISARIA CORDON DEL PLATA' },
-                        { value: 'subcomisaria_san_jose', text: 'SUBCOMISARIA SAN JOSE' },
-                        { value: 'subcomisaria_el_manzano', text: 'SUBCOMISARIA EL MANZANO' }
-                    ];
-                    
-                    todasLasDependencias.forEach(dep => {
-                        const option = document.createElement('option');
-                        option.value = dep.value;
-                        option.textContent = dep.text;
-                        dependenciaSelect.appendChild(option);
-                    });
-                }
+                dependencias.forEach(dependencia => {
+                    const option = document.createElement('option');
+                    option.value = dependencia.value;
+                    option.textContent = dependencia.text;
+                    dependenciaSelect.appendChild(option);
+                });
             }
-            
-            // Event listener para cuando cambie el departamento
-            departamentoSelect.addEventListener('change', actualizarDependencias);
-            
-            // Inicializar dependencias al cargar la página
-            actualizarDependencias();
-        });
+        }
 
         // Script para autocompletar fecha y hora al guardar (ya existente)
         document.querySelector('.form-container form').addEventListener('submit', function(event) {
@@ -513,6 +470,10 @@
                                 element.value = novedadToEdit[key];
                             } else if (element.tagName === 'SELECT') {
                                 element.value = novedadToEdit[key];
+                                // Si es el campo departamento, actualizar las dependencias
+                                if (key === 'departamento') {
+                                    actualizarDependencias();
+                                }
                             } else if (key === 'horaDelHecho') { // Capturar horaHecho como horaDelHecho
                                 document.getElementById('horaHecho').value = novedadToEdit[key];
                             } else if (key === 'nombreImputado') {
@@ -563,6 +524,10 @@
             if (novedadId) {
                 loadNovedadForEdit(novedadId);
             }
+            
+            // Agregar event listener para cambio de departamento
+            const departamentoSelect = document.getElementById('departamento');
+            departamentoSelect.addEventListener('change', actualizarDependencias);
         });
 
         map.on('click', function(e) {
