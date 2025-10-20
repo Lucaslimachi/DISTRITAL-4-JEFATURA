@@ -59,6 +59,7 @@
                         <option value="OFICIAL DE SAN JOSE">OFICIAL DE SAN JOSE</option>
                         <option value="JEF.DTAL.TUNUYAN">JEF.DTAL.TUNUYAN</option>
                         <option value="JEF.DTAL.SAN CARLOS">JEF.DTAL.SAN CARLOS</option>
+                        <option value="JEF.DTAL.TUPUNGATO">JEF.DTAL.TUPUNGATO</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -216,6 +217,13 @@
                 registerUserDashboardBtn.style.display = 'none'; // Ocultar para JEF.DTAL.SAN CARLOS
                 viewUsersBtn.style.display = 'none'; // Ocultar para JEF.DTAL.SAN CARLOS
                 estadisticasBtn.style.display = 'none'; // Ocultar para JEF.DTAL.SAN CARLOS
+            } else if (userRole === 'JEF.DTAL.TUPUNGATO') { // Rol JEF.DTAL.TUPUNGATO
+                novedadesParteBtn.style.display = 'block';
+                verNovedadesBtn.style.display = 'block';
+                mapaDelictualBtn.style.display = 'block'; // Mostrar Mapa Delictual para JEF.DTAL.TUPUNGATO
+                registerUserDashboardBtn.style.display = 'none'; // Ocultar para JEF.DTAL.TUPUNGATO
+                viewUsersBtn.style.display = 'none'; // Ocultar para JEF.DTAL.TUPUNGATO
+                estadisticasBtn.style.display = 'none'; // Ocultar para JEF.DTAL.TUPUNGATO
             } else if (userRole === 'user') { // Rol OPERATIVO
                 novedadesParteBtn.style.display = 'none';
                 verNovedadesBtn.style.display = 'none';
