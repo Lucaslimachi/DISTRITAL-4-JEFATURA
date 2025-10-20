@@ -19,6 +19,10 @@
                 <input type="date" id="filterDate">
             </div>
             <div class="filter-group">
+                <label for="filterFechaCarga">Fecha de Carga:</label>
+                <input type="date" id="filterFechaCarga">
+            </div>
+            <div class="filter-group">
                 <label for="filterStartTime">Hora Inicio:</label>
                 <input type="time" id="filterStartTime">
             </div>
@@ -278,6 +282,7 @@
 
             applyFiltersBtn.addEventListener('click', function() {
                 const filterDate = filterDateInput.value;
+                const filterFechaCarga = document.getElementById('filterFechaCarga').value;
                 const filterStartTime = filterStartTimeInput.value;
                 const filterEndTime = filterEndTimeInput.value;
                 const selectedTipoDependencia = filterTipoDependenciaSelect.value;
@@ -324,6 +329,10 @@
                     filtered = filtered.filter(novedad => (novedad.fechaDelHecho || novedad.fechaCarga) === filterDate);
                 }
 
+                if (filterFechaCarga) {
+                    filtered = filtered.filter(novedad => novedad.fechaCreacion === filterFechaCarga);
+                }
+
                 if (filterStartTime && filterEndTime) {
                     filtered = filtered.filter(novedad => {
                         const novedadTime = novedad.horaDelHecho || novedad.horaCarga;
@@ -363,6 +372,7 @@
                 filterTipoDependenciaSelect.value = '';
                 filterImputadoInput.value = '';
                 filterVictimaInput.value = '';
+                document.getElementById('filterFechaCarga').value = '';
                 
                 // Mantener el filtro de dependencia según el rol del usuario
                 if (userRole === 'OFICIAL DE 41') {
