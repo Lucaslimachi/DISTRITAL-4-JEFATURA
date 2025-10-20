@@ -647,14 +647,6 @@
                         const dependenciaSelect = document.getElementById('dependencia');
                         dependenciaSelect.value = 'subcomisaria_san_jose';
                     }, 100);
-                } else if (userRole === 'JEF.DTAL.TUNUYAN') {
-                    // Para JEF.DTAL.TUNUYAN, no preseleccionar automáticamente
-                    // Permitir que el usuario seleccione manualmente entre las dependencias disponibles
-                    const departamentoSelect = document.getElementById('departamento');
-                    departamentoSelect.value = 'departamental_tunuyan';
-                    
-                    // Actualizar las dependencias para mostrar las opciones disponibles
-                    actualizarDependencias();
                 }
             } catch (error) {
                 console.error('Error al decodificar el token JWT:', error);
