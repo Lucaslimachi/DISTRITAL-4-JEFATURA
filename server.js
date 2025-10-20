@@ -266,8 +266,12 @@ app.get('/novedades', authenticateToken, async (req, res) => {
     } else if (req.user.role === 'JEF.DTAL.TUNUYAN') {
       // Solo mostrar novedades de Comisaría 15, Comisaría 65 y Subcomisaría El Manzano
       novedades = await Novedad.findAll({
-        where: { 
-          dependencia: ['comisaria_15', 'comisaria_65', 'subcomisaria_el_manzano']
+        where: {
+          [Sequelize.Op.or]: [
+            { dependencia: 'comisaria_15' },
+            { dependencia: 'comisaria_65' },
+            { dependencia: 'subcomisaria_el_manzano' }
+          ]
         }
       });
     } else {
