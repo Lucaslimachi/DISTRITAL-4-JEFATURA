@@ -55,6 +55,7 @@
             </div>
             <button id="applyMapFiltersBtn">Buscar</button>
             <button id="clearMapFiltersBtn">Limpiar Filtros</button>
+            <button id="locateUserBtn">Mi Ubicación</button>
         </div>
         <div id="delictualMap"></div>
         <button onclick="window.history.back()">Volver a la página anterior</button>
@@ -499,6 +500,24 @@
                     renderMapMarkers(filteredByDependency);
                 } else {
                     renderMapMarkers(allNovedades); // Mostrar todas las novedades de nuevo
+                }
+            const locateUserBtn = document.getElementById('locateUserBtn');
+            locateUserBtn.addEventListener('click', function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const userLatLng = L.latLng(lat, lng);
+
+                        map.setView(userLatLng, 15);
+                        L.marker(userLatLng).addTo(map)
+                            .bindPopup('Tu ubicación actual.')
+                            .openPopup();
+                    }, function() {
+                        alert('No se pudo obtener tu ubicación. Asegúrate de haber aceptado los permisos.');
+                    });
+                } else {
+                    alert('Tu navegador no soporta la geolocalización.');
                 }
             });
         });
