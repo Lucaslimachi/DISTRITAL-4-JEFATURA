@@ -634,6 +634,19 @@
                         const dependenciaSelect = document.getElementById('dependencia');
                         dependenciaSelect.value = 'subcomisaria_cordon_del_plata';
                     }, 100);
+                } else if (userRole === 'OFICIAL DE SAN JOSE') {
+                    // Seleccionar automáticamente DEPARTAMENTAL TUPUNGATO
+                    const departamentoSelect = document.getElementById('departamento');
+                    departamentoSelect.value = 'departamental_tupungato';
+                    
+                    // Actualizar las dependencias y seleccionar SUBCOMISARIA SAN JOSE
+                    actualizarDependencias();
+                    
+                    // Esperar un momento para que se actualicen las dependencias
+                    setTimeout(() => {
+                        const dependenciaSelect = document.getElementById('dependencia');
+                        dependenciaSelect.value = 'subcomisaria_san_jose';
+                    }, 100);
                 }
             } catch (error) {
                 console.error('Error al decodificar el token JWT:', error);

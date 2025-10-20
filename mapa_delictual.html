@@ -205,6 +205,10 @@
                         allNovedades = allNovedades.filter(novedad => {
                             return novedad.dependencia && novedad.dependencia.includes('subcomisaria_cordon_del_plata');
                         });
+                    } else if (userRole === 'OFICIAL DE SAN JOSE') {
+                        allNovedades = allNovedades.filter(novedad => {
+                            return novedad.dependencia && novedad.dependencia.includes('subcomisaria_san_jose');
+                        });
                     }
                     
                     populateFilters(); // Populate filters with fetched data
@@ -348,6 +352,10 @@
                     filteredNovedades = filteredNovedades.filter(novedad => {
                         return novedad.dependencia && novedad.dependencia.includes('subcomisaria_cordon_del_plata');
                     });
+                } else if (userRole === 'OFICIAL DE SAN JOSE') {
+                    filteredNovedades = filteredNovedades.filter(novedad => {
+                        return novedad.dependencia && novedad.dependencia.includes('subcomisaria_san_jose');
+                    });
                 }
 
                 
@@ -435,6 +443,11 @@
                 } else if (userRole === 'OFICIAL CORDON DEL PLATA') {
                     const filteredByDependency = allNovedades.filter(novedad => {
                         return novedad.dependencia && novedad.dependencia.includes('subcomisaria_cordon_del_plata');
+                    });
+                    renderMapMarkers(filteredByDependency);
+                } else if (userRole === 'OFICIAL DE SAN JOSE') {
+                    const filteredByDependency = allNovedades.filter(novedad => {
+                        return novedad.dependencia && novedad.dependencia.includes('subcomisaria_san_jose');
                     });
                     renderMapMarkers(filteredByDependency);
                 } else {

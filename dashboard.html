@@ -57,6 +57,7 @@
                         <option value="OFICIAL DE 41">OFICIAL DE 41</option>
                         <option value="OFICIAL MANZANO HISTORICO">OFICIAL MANZANO HISTORICO</option>
                         <option value="OFICIAL CORDON DEL PLATA">OFICIAL CORDON DEL PLATA</option>
+                        <option value="OFICIAL DE SAN JOSE">OFICIAL DE SAN JOSE</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -193,6 +194,13 @@
                 registerUserDashboardBtn.style.display = 'none'; // Ocultar para OFICIAL CORDON DEL PLATA
                 viewUsersBtn.style.display = 'none'; // Ocultar para OFICIAL CORDON DEL PLATA
                 estadisticasBtn.style.display = 'none'; // Ocultar para OFICIAL CORDON DEL PLATA
+            } else if (userRole === 'OFICIAL DE SAN JOSE') { // Rol OFICIAL DE SAN JOSE
+                novedadesParteBtn.style.display = 'block';
+                verNovedadesBtn.style.display = 'block';
+                mapaDelictualBtn.style.display = 'block'; // Mostrar Mapa Delictual para OFICIAL DE SAN JOSE
+                registerUserDashboardBtn.style.display = 'none'; // Ocultar para OFICIAL DE SAN JOSE
+                viewUsersBtn.style.display = 'none'; // Ocultar para OFICIAL DE SAN JOSE
+                estadisticasBtn.style.display = 'none'; // Ocultar para OFICIAL DE SAN JOSE
             } else if (userRole === 'user') { // Rol Invitado
                 novedadesParteBtn.style.display = 'none';
                 verNovedadesBtn.style.display = 'none';
