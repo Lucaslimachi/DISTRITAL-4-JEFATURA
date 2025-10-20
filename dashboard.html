@@ -58,6 +58,7 @@
                         <option value="OFICIAL CORDON DEL PLATA">OFICIAL CORDON DEL PLATA</option>
                         <option value="OFICIAL DE SAN JOSE">OFICIAL DE SAN JOSE</option>
                         <option value="JEF.DTAL.TUNUYAN">JEF.DTAL.TUNUYAN</option>
+                        <option value="JEF.DTAL.SAN CARLOS">JEF.DTAL.SAN CARLOS</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -208,6 +209,13 @@
                 registerUserDashboardBtn.style.display = 'none'; // Ocultar para JEF.DTAL.TUNUYAN
                 viewUsersBtn.style.display = 'none'; // Ocultar para JEF.DTAL.TUNUYAN
                 estadisticasBtn.style.display = 'none'; // Ocultar para JEF.DTAL.TUNUYAN
+            } else if (userRole === 'JEF.DTAL.SAN CARLOS') { // Rol JEF.DTAL.SAN CARLOS
+                novedadesParteBtn.style.display = 'block';
+                verNovedadesBtn.style.display = 'block';
+                mapaDelictualBtn.style.display = 'block'; // Mostrar Mapa Delictual para JEF.DTAL.SAN CARLOS
+                registerUserDashboardBtn.style.display = 'none'; // Ocultar para JEF.DTAL.SAN CARLOS
+                viewUsersBtn.style.display = 'none'; // Ocultar para JEF.DTAL.SAN CARLOS
+                estadisticasBtn.style.display = 'none'; // Ocultar para JEF.DTAL.SAN CARLOS
             } else if (userRole === 'user') { // Rol OPERATIVO
                 novedadesParteBtn.style.display = 'none';
                 verNovedadesBtn.style.display = 'none';

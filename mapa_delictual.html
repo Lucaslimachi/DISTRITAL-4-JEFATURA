@@ -217,6 +217,13 @@
                                 novedad.dependencia.includes('subcomisaria_el_manzano')
                             );
                         });
+                    } else if (userRole === 'JEF.DTAL.SAN CARLOS') {
+                        allNovedades = allNovedades.filter(novedad => {
+                            return novedad.dependencia && (
+                                novedad.dependencia.includes('comisaria_18') ||
+                                novedad.dependencia.includes('comisaria_41')
+                            );
+                        });
                     }
                     
                     populateFilters(); // Populate filters with fetched data
@@ -372,6 +379,13 @@
                             novedad.dependencia.includes('subcomisaria_el_manzano')
                         );
                     });
+                } else if (userRole === 'JEF.DTAL.SAN CARLOS') {
+                    filteredNovedades = filteredNovedades.filter(novedad => {
+                        return novedad.dependencia && (
+                            novedad.dependencia.includes('comisaria_18') ||
+                            novedad.dependencia.includes('comisaria_41')
+                        );
+                    });
                 }
 
                 
@@ -472,6 +486,14 @@
                             novedad.dependencia.includes('comisaria_15') ||
                             novedad.dependencia.includes('comisaria_65') ||
                             novedad.dependencia.includes('subcomisaria_el_manzano')
+                        );
+                    });
+                    renderMapMarkers(filteredByDependency);
+                } else if (userRole === 'JEF.DTAL.SAN CARLOS') {
+                    const filteredByDependency = allNovedades.filter(novedad => {
+                        return novedad.dependencia && (
+                            novedad.dependencia.includes('comisaria_18') ||
+                            novedad.dependencia.includes('comisaria_41')
                         );
                     });
                     renderMapMarkers(filteredByDependency);

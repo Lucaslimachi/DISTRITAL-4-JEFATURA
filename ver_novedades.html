@@ -141,6 +141,13 @@
                                 novedad.dependencia.includes('subcomisaria_el_manzano')
                             );
                         });
+                    } else if (userRole === 'JEF.DTAL.SAN CARLOS') {
+                        allNovedades = allNovedades.filter(novedad => {
+                            return novedad.dependencia && (
+                                novedad.dependencia.includes('comisaria_18') ||
+                                novedad.dependencia.includes('comisaria_41')
+                            );
+                        });
                     }
                     
                     populateFilters(allNovedades);
@@ -227,7 +234,7 @@
                             });
                             novedadCard.innerHTML = cardContent;
 
-                            if (userRole === 'admin' || userRole === 'JEF.DTAL.TUNUYAN') {
+                            if (userRole === 'admin' || userRole === 'JEF.DTAL.TUNUYAN' || userRole === 'JEF.DTAL.SAN CARLOS') {
                                 const editButton = document.createElement('button');
                                 editButton.textContent = 'Editar';
                                 editButton.classList.add('edit-btn');
@@ -304,6 +311,13 @@
                             novedad.dependencia.includes('subcomisaria_el_manzano')
                         );
                     });
+                } else if (userRole === 'JEF.DTAL.SAN CARLOS') {
+                    filtered = filtered.filter(novedad => {
+                        return novedad.dependencia && (
+                            novedad.dependencia.includes('comisaria_18') ||
+                            novedad.dependencia.includes('comisaria_41')
+                        );
+                    });
                 }
 
                 if (filterDate) {
@@ -377,6 +391,14 @@
                             novedad.dependencia.includes('comisaria_15') ||
                             novedad.dependencia.includes('comisaria_65') ||
                             novedad.dependencia.includes('subcomisaria_el_manzano')
+                        );
+                    });
+                    renderNovedades(filteredByDependency);
+                } else if (userRole === 'JEF.DTAL.SAN CARLOS') {
+                    const filteredByDependency = allNovedades.filter(novedad => {
+                        return novedad.dependencia && (
+                            novedad.dependencia.includes('comisaria_18') ||
+                            novedad.dependencia.includes('comisaria_41')
                         );
                     });
                     renderNovedades(filteredByDependency);
