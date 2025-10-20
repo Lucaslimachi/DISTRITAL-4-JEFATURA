@@ -209,6 +209,14 @@
                         allNovedades = allNovedades.filter(novedad => {
                             return novedad.dependencia && novedad.dependencia.includes('subcomisaria_san_jose');
                         });
+                    } else if (userRole === 'JEF.DTAL.TUNUYAN') {
+                        allNovedades = allNovedades.filter(novedad => {
+                            return novedad.dependencia && (
+                                novedad.dependencia.includes('comisaria_15') ||
+                                novedad.dependencia.includes('comisaria_65') ||
+                                novedad.dependencia.includes('subcomisaria_el_manzano')
+                            );
+                        });
                     }
                     
                     populateFilters(); // Populate filters with fetched data
@@ -356,6 +364,14 @@
                     filteredNovedades = filteredNovedades.filter(novedad => {
                         return novedad.dependencia && novedad.dependencia.includes('subcomisaria_san_jose');
                     });
+                } else if (userRole === 'JEF.DTAL.TUNUYAN') {
+                    filteredNovedades = filteredNovedades.filter(novedad => {
+                        return novedad.dependencia && (
+                            novedad.dependencia.includes('comisaria_15') ||
+                            novedad.dependencia.includes('comisaria_65') ||
+                            novedad.dependencia.includes('subcomisaria_el_manzano')
+                        );
+                    });
                 }
 
                 
@@ -448,6 +464,15 @@
                 } else if (userRole === 'OFICIAL DE SAN JOSE') {
                     const filteredByDependency = allNovedades.filter(novedad => {
                         return novedad.dependencia && novedad.dependencia.includes('subcomisaria_san_jose');
+                    });
+                    renderMapMarkers(filteredByDependency);
+                } else if (userRole === 'JEF.DTAL.TUNUYAN') {
+                    const filteredByDependency = allNovedades.filter(novedad => {
+                        return novedad.dependencia && (
+                            novedad.dependencia.includes('comisaria_15') ||
+                            novedad.dependencia.includes('comisaria_65') ||
+                            novedad.dependencia.includes('subcomisaria_el_manzano')
+                        );
                     });
                     renderMapMarkers(filteredByDependency);
                 } else {

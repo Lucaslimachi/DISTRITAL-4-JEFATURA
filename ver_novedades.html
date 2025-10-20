@@ -133,6 +133,14 @@
                         allNovedades = allNovedades.filter(novedad => {
                             return novedad.dependencia && novedad.dependencia.includes('subcomisaria_san_jose');
                         });
+                    } else if (userRole === 'JEF.DTAL.TUNUYAN') {
+                        allNovedades = allNovedades.filter(novedad => {
+                            return novedad.dependencia && (
+                                novedad.dependencia.includes('comisaria_15') ||
+                                novedad.dependencia.includes('comisaria_65') ||
+                                novedad.dependencia.includes('subcomisaria_el_manzano')
+                            );
+                        });
                     }
                     
                     populateFilters(allNovedades);
@@ -219,7 +227,7 @@
                             });
                             novedadCard.innerHTML = cardContent;
 
-                            if (userRole === 'admin') {
+                            if (userRole === 'admin' || userRole === 'JEF.DTAL.TUNUYAN') {
                                 const editButton = document.createElement('button');
                                 editButton.textContent = 'Editar';
                                 editButton.classList.add('edit-btn');
@@ -288,6 +296,14 @@
                     filtered = filtered.filter(novedad => {
                         return novedad.dependencia && novedad.dependencia.includes('subcomisaria_san_jose');
                     });
+                } else if (userRole === 'JEF.DTAL.TUNUYAN') {
+                    filtered = filtered.filter(novedad => {
+                        return novedad.dependencia && (
+                            novedad.dependencia.includes('comisaria_15') ||
+                            novedad.dependencia.includes('comisaria_65') ||
+                            novedad.dependencia.includes('subcomisaria_el_manzano')
+                        );
+                    });
                 }
 
                 if (filterDate) {
@@ -353,6 +369,15 @@
                 } else if (userRole === 'OFICIAL DE SAN JOSE') {
                     const filteredByDependency = allNovedades.filter(novedad => {
                         return novedad.dependencia && novedad.dependencia.includes('subcomisaria_san_jose');
+                    });
+                    renderNovedades(filteredByDependency);
+                } else if (userRole === 'JEF.DTAL.TUNUYAN') {
+                    const filteredByDependency = allNovedades.filter(novedad => {
+                        return novedad.dependencia && (
+                            novedad.dependencia.includes('comisaria_15') ||
+                            novedad.dependencia.includes('comisaria_65') ||
+                            novedad.dependencia.includes('subcomisaria_el_manzano')
+                        );
                     });
                     renderNovedades(filteredByDependency);
                 } else {
