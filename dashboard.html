@@ -47,7 +47,7 @@
                 <div class="input-group">
                     <label for="regRole">Rol:</label>
                     <select id="regRole" name="regRole">
-                        <option value="user">Invitado</option>
+                        <option value="user">OPERATIVO</option>
                         <option value="admin">Administrador</option>
                         <option value="user-oficiales">Usuario-Oficiales</option>
                         <option value="OFICIAL DE 15">OFICIAL DE 15</option>
@@ -201,12 +201,12 @@
                 registerUserDashboardBtn.style.display = 'none'; // Ocultar para OFICIAL DE SAN JOSE
                 viewUsersBtn.style.display = 'none'; // Ocultar para OFICIAL DE SAN JOSE
                 estadisticasBtn.style.display = 'none'; // Ocultar para OFICIAL DE SAN JOSE
-            } else if (userRole === 'user') { // Rol Invitado
+            } else if (userRole === 'user') { // Rol OPERATIVO
                 novedadesParteBtn.style.display = 'none';
                 verNovedadesBtn.style.display = 'none';
                 registerUserDashboardBtn.style.display = 'none';
                 viewUsersBtn.style.display = 'none';
-                mapaDelictualBtn.style.display = 'block'; // Mostrar solo Mapa Delictual para Invitados
+                mapaDelictualBtn.style.display = 'block'; // Mostrar solo Mapa Delictual para OPERATIVO
                 estadisticasBtn.style.display = 'none';
             } else {
                 novedadesParteBtn.style.display = 'none';
