@@ -335,13 +335,13 @@
 
                 if (filterStartTime && filterEndTime) {
                     filtered = filtered.filter(novedad => {
-                        const novedadTime = novedad.horaDelHecho || novedad.horaCarga;
+                        const novedadTime = novedad.horaCarga;
                         return novedadTime >= filterStartTime && novedadTime <= filterEndTime;
                     });
                 } else if (filterStartTime) {
-                    filtered = filtered.filter(novedad => (novedad.horaDelHecho || novedad.horaCarga) >= filterStartTime);
+                    filtered = filtered.filter(novedad => novedad.horaCarga >= filterStartTime);
                 } else if (filterEndTime) {
-                    filtered = filtered.filter(novedad => (novedad.horaDelHecho || novedad.horaCarga) <= filterEndTime);
+                    filtered = filtered.filter(novedad => novedad.horaCarga <= filterEndTime);
                 }
 
                 if (selectedTipoDependencia) {
