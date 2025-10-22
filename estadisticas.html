@@ -381,14 +381,14 @@
                 // Filtrar por rango de fecha
                 if (startDate) {
                     filteredNovedades = filteredNovedades.filter(novedad => {
-                        const novedadDate = new Date(novedad.fecha);
+                        const novedadDate = new Date(novedad.fechaDelHecho);
                         return novedadDate >= new Date(startDate);
                     });
                 }
 
                 if (endDate) {
                     filteredNovedades = filteredNovedades.filter(novedad => {
-                        const novedadDate = new Date(novedad.fecha);
+                        const novedadDate = new Date(novedad.fechaDelHecho);
                         return novedadDate <= new Date(endDate + 'T23:59:59');
                     });
                 }
