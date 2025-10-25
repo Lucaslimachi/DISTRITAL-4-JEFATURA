@@ -5,62 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">                                                                 
     <title>Mapa Delictual</title>                                                                                                          
     <link rel="stylesheet" href="style.css">                                                                                               
-    <link rel="stylesheet" href="mapa_delictual.css">                                                                                      
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />                                                            
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>                                                                      
-</head>                                                                                                                                    
-<body>                                                                                                                                     
-    <div class="map-delictual-container">                                                                                                  
-        <h1>Mapa Delictual de Novedades</h1>                                                                                               
-        <div class="filters-container">                                                                                                    
-                                                                                                                                           
-            <div class="filter-group">                                                                                                     
-                <label for="filterDependencia">Dependencia:</label>                                                                        
-                <select id="filterDependencia" name="filterDependencia">                                                                   
-                    <option value="">Todas</option>                                                                                        
-                </select>                                                                                                                  
-            </div>                                                                                                                         
-            <div class="filter-group">                                                                                                     
-                <label for="filterLugar">Lugar:</label>                                                                                    
-                <select id="filterLugar" name="filterLugar">                                                                               
-                    <option value="">Todos</option>                                                                                        
-                </select>                                                                                                                  
-            </div>                                                                                                                         
-            <div class="filter-group">                                                                                                     
-                <label for="filterEncuadreLegal">Encuadre Legal:</label>                                                                   
-                <input list="filterEncuadreLegalOptions" id="filterEncuadreLegal" name="filterEncuadreLegal">                              
-                <datalist id="filterEncuadreLegalOptions"></datalist>                                                                      
-            </div>                                                                                                                         
-            <div class="filter-group">                                                                                                     
-                <label for="filterStartDate">Fecha Inicio:</label>                                                                         
-                <input type="date" id="filterStartDate">                                                                                   
-            </div>                                                                                                                         
-            <div class="filter-group">                                                                                                     
-                <label for="filterEndDate">Fecha Fin:</label>                                                                              
-                <input type="date" id="filterEndDate">                                                                                     
-            </div>                                                                                                                         
-            <div class="filter-group">                                                                                                     
-                <label for="filterImputadoMap">Nombre del Imputado:</label>                                                                
-                <input type="text" id="filterImputadoMap" placeholder="Filtrar por nombre del imputado">                                   
-            </div>                                                                                                                         
-            <div class="filter-group">                                                                                                     
-                <label for="filterDayTimeInterval">Intervalo del Día:</label>                                                              
-                <select id="filterDayTimeInterval">                                                                                        
-                    <option value="">Todos</option>                                                                                        
-                    <option value="madrugada">Madrugada (00:00 - 05:59)</option>                                                           
-                    <option value="manana">Mañana (06:00 - 11:59)</option>                                                                 
-                    <option value="tarde">Tarde (12:00 - 18:59)</option>                                                                   
-                    <option value="noche">Noche (19:00 - 23:59)</option>                                                                   
-                </select>                                                                                                                  
-            </div>                                                                                                                         
-            <button id="applyMapFiltersBtn">Buscar</button>                                                                                
-            <button id="clearMapFiltersBtn">Limpiar Filtros</button>                                                                       
-        </div>                                                                                                                             
-        <div id="delictualMap"></div>                                                                                                      
-        <button onclick="window.history.back()">Volver a la página anterior</button>                                                       
-    </div>                                                                                                                                 
-                                                                                                                                           
-    <script>                                                                                                                               
+    <link rel="stylesheet" href="mapa_delictual.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+</head>
+<body>
+    <div class="map-delictual-container">
+        <h1>Mapa Delictual de Novedades</h1>
+        <div class="filters-container">
+
+            <div class="filter-group">
+                <label for="filterDependencia">Dependencia:</label>
+                <select id="filterDependencia" name="filterDependencia">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterLugar">Lugar:</label>
+                <select id="filterLugar" name="filterLugar">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterEncuadreLegal">Encuadre Legal:</label>
+                <input list="filterEncuadreLegalOptions" id="filterEncuadreLegal" name="filterEncuadreLegal">
+                <datalist id="filterEncuadreLegalOptions"></datalist>
+            </div>
+            <div class="filter-group">
+                <label for="filterStartDate">Fecha Inicio:</label>
+                <input type="date" id="filterStartDate">
+            </div>
+            <div class="filter-group">
+                <label for="filterEndDate">Fecha Fin:</label>
+                <input type="date" id="filterEndDate">
+            </div>
+            <div class="filter-group">
+                <label for="filterImputadoMap">Nombre del Imputado:</label>
+                <input type="text" id="filterImputadoMap" placeholder="Filtrar por nombre del imputado">
+            </div>
+            <div class="filter-group">
+                <label for="filterDayTimeInterval">Intervalo del Día:</label>
+                <select id="filterDayTimeInterval">
+                    <option value="">Todos</option>
+                    <option value="madrugada">Madrugada (00:00 - 05:59)</option>
+                    <option value="manana">Mañana (06:00 - 11:59)</option>
+                    <option value="tarde">Tarde (12:00 - 18:59)</option>
+                    <option value="noche">Noche (19:00 - 23:59)</option>
+                </select>
+            </div>
+            <button id="applyMapFiltersBtn">Buscar</button>
+            <button id="clearMapFiltersBtn">Limpiar Filtros</button>
+        </div>
+        <div id="delictualMap"></div>
+        <button onclick="window.history.back()">Volver a la página anterior</button>
+    </div>
+
+    <script>
         const API_BASE_URL = 'http://localhost:3001'; // Define the API base URL
         let allNovedades = []; // Variable global para almacenar todas las novedades                                                       
                                                                                                                                            
@@ -162,14 +164,14 @@
             const filterStartDateInput = document.getElementById('filterStartDate');                                                       
             const filterEndDateInput = document.getElementById('filterEndDate');                                                           
             const filterImputadoMapInput = document.getElementById('filterImputadoMap'); // Nuevo filtro                                   
-            const filterDayTimeIntervalSelect = document.getElementById('filterDayTimeInterval'); // Nuevo filtro                          
-            const applyMapFiltersBtn = document.getElementById('applyMapFiltersBtn');                                                      
-            const clearMapFiltersBtn = document.getElementById('clearMapFiltersBtn');                                                      
-                                                                                                                                           
-            // Fetch novedades from API                                                                                                    
-            function fetchNovedades() {                                                                                                    
-                const token = localStorage.getItem('jwtToken');                                                                            
-                if (!token) {                                                                                                              
+            const filterDayTimeIntervalSelect = document.getElementById('filterDayTimeInterval'); // Nuevo filtro
+            const applyMapFiltersBtn = document.getElementById('applyMapFiltersBtn');
+            const clearMapFiltersBtn = document.getElementById('clearMapFiltersBtn');
+
+            // Fetch novedades from API
+            function fetchNovedades() {
+                const token = localStorage.getItem('jwtToken');
+                if (!token) {
                     alert('No estás autenticado. Por favor, inicia sesión.');                                                              
                     window.location.href = 'index.html';                                                                                   
                     return;                                                                                                                
@@ -499,9 +501,52 @@
                     renderMapMarkers(filteredByDependency);                                                                                
                 } else {                                                                                                                   
                     renderMapMarkers(allNovedades); // Mostrar todas las novedades de nuevo                                                
-                }                                                                                                                          
-            });                                                                                                                            
-        });                                                                                                                                
-    </script>                                                                                                                              
-</body>                                                                                                                                    
+                }
+            });
+
+            // Añadir el control de geolocalización de Leaflet después de que el mapa esté completamente inicializado
+            setTimeout(() => {
+                L.control.locate({
+                    position: 'topleft',
+                    strings: {
+                        title: "Localizar mi ubicación"
+                    },
+                    locateOptions: {
+                        maxZoom: 16,
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    },
+                    onLocationError: function(err) {
+                        console.error('Error de geolocalización:', err);
+
+                        let errorMessage = '';
+                        switch(err.code) {
+                            case err.PERMISSION_DENIED:
+                                errorMessage = 'Permiso de geolocalización denegado. Por favor, permite el acceso a tu ubicación en la configuración del navegador.';
+                                break;
+                            case err.POSITION_UNAVAILABLE:
+                                errorMessage = 'Ubicación no disponible. Verifica que el GPS esté activado.';
+                                break;
+                            case err.TIMEOUT:
+                                errorMessage = 'Tiempo de espera agotado. Intenta nuevamente.';
+                                break;
+                            default:
+                                errorMessage = 'Error al obtener tu ubicación: ' + err.message;
+                                break;
+                        }
+                        alert(errorMessage);
+                    },
+                    onLocationOutsideMapBounds: function(lc) {
+                        lc.stop();
+                        alert("Tu ubicación está fuera del área del mapa actual.");
+                    },
+                    flyTo: true, // Animación para volar a la ubicación
+                    showPopup: true, // Mostrar un popup con la ubicación
+                    drawCircle: true, // Dibujar un círculo de precisión
+                }).addTo(map);
+            }, 100);
+        });
+    </script>
+</body>
 </html>

@@ -211,9 +211,9 @@ const ALL_OFFICIAL_ROLES = [
   'OFICIAL DE 18',
   'OFICIAL MANZANO HISTORICO',
   'OFICIAL CORDON DEL PLATA',
-  'JEF.DTAL.TUNUYAN',
-  'JEF.DTAL.SAN CARLOS',
-  'JEF.DTAL.TUPUNGATO'
+  'JEF.DPTAL.TUNUYAN',
+  'JEF.DPTAL.SAN CARLOS',
+  'JEF.DPTAL.TUPUNGATO'
 ];
 
 // Middleware para autorización de roles
@@ -244,9 +244,9 @@ app.get('/novedades', authenticateToken, async (req, res) => {
 
     // Define specific dependency groups for JEF.DTAL roles
     const jefDtalDependencies = {
-      'JEF.DTAL.TUNUYAN': ['comisaria_15', 'comisaria_65', 'subcomisaria_el_manzano'],
-      'JEF.DTAL.SAN CARLOS': ['comisaria_18', 'comisaria_41'],
-      'JEF.DTAL.TUPUNGATO': ['comisaria_20', 'subcomisaria_cordon_del_plata', 'subcomisaria_san_jose'],
+      'JEF.DPTAL.TUNUYAN': ['comisaria_15', 'comisaria_65', 'subcomisaria_el_manzano'],
+      'JEF.DPTAL.SAN CARLOS': ['comisaria_18', 'comisaria_41'],
+      'JEF.DPTAL.TUPUNGATO': ['comisaria_20', 'subcomisaria_cordon_del_plata', 'subcomisaria_san_jose'],
     };
 
     const userRole = req.user.role;
@@ -426,6 +426,10 @@ app.get('/users', authenticateToken, authorizeRoles(['admin']), async (req, res)
 // Nuevas rutas protegidas para "Usuario-Oficiales", "admin", "OFICIAL DE 15", "OFICIAL DE 20", "OFICIAL DE 65", "OFICIAL DE 18", "OFICIAL MANZANO HISTORICO", "OFICIAL CORDON DEL PLATA", "JEF.DTAL.TUNUYAN" y "JEF.DTAL.SAN CARLOS"
 app.get('/novedades_parte', authenticateToken, authorizeRoles(ALL_OFFICIAL_ROLES), (req, res) => {
   res.json({ message: `Bienvenido a Parte de Novedades, ${req.user.username}!` });
+});
+
+app.get('/dashboard', authenticateToken, authorizeRoles(['admin', 'JEF.DPTAL.TUNUYAN', 'JEF.DPTAL.SAN CARLOS', 'JEF.DPTAL.TUPUNGATO']), (req, res) => {
+  res.json({ message: `Bienvenido al Dashboard, ${req.user.username}!` });
 });
 
 app.get('/ver_novedades', authenticateToken, authorizeRoles(ALL_OFFICIAL_ROLES), (req, res) => {

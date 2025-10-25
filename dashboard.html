@@ -57,9 +57,9 @@
                         <option value="OFICIAL MANZANO HISTORICO">OFICIAL MANZANO HISTORICO</option>
                         <option value="OFICIAL CORDON DEL PLATA">OFICIAL CORDON DEL PLATA</option>
                         <option value="OFICIAL DE SAN JOSE">OFICIAL DE SAN JOSE</option>
-                        <option value="JEF.DTAL.TUNUYAN">JEF.DTAL.TUNUYAN</option>
-                        <option value="JEF.DTAL.SAN CARLOS">JEF.DTAL.SAN CARLOS</option>
-                        <option value="JEF.DTAL.TUPUNGATO">JEF.DTAL.TUPUNGATO</option>
+                        <option value="JEF.DPTAL.TUNUYAN">JEF.DPTAL.TUNUYAN</option>
+                        <option value="JEF.DPTAL.SAN CARLOS">JEF.DPTAL.SAN CARLOS</option>
+                        <option value="JEF.DPTAL.TUPUNGATO">JEF.DPTAL.TUPUNGATO</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -203,21 +203,21 @@
                 registerUserDashboardBtn.style.display = 'none'; // Ocultar para OFICIAL DE SAN JOSE
                 viewUsersBtn.style.display = 'none'; // Ocultar para OFICIAL DE SAN JOSE
                 estadisticasBtn.style.display = 'none'; // Ocultar para OFICIAL DE SAN JOSE
-            } else if (userRole === 'JEF.DTAL.TUNUYAN') { // Rol JEF.DTAL.TUNUYAN
+            } else if (userRole === 'JEF.DPTAL.TUNUYAN') { // Rol JEF.DPTAL.TUNUYAN
                 novedadesParteBtn.style.display = 'block';
                 verNovedadesBtn.style.display = 'block';
-                mapaDelictualBtn.style.display = 'block'; // Mostrar Mapa Delictual para JEF.DTAL.TUNUYAN
-                registerUserDashboardBtn.style.display = 'none'; // Ocultar para JEF.DTAL.TUNUYAN
-                viewUsersBtn.style.display = 'none'; // Ocultar para JEF.DTAL.TUNUYAN
-                estadisticasBtn.style.display = 'none'; // Ocultar para JEF.DTAL.TUNUYAN
-            } else if (userRole === 'JEF.DTAL.SAN CARLOS') { // Rol JEF.DTAL.SAN CARLOS
+                mapaDelictualBtn.style.display = 'block'; // Mostrar Mapa Delictual para JEF.DPTAL.TUNUYAN
+                registerUserDashboardBtn.style.display = 'none'; // Ocultar para JEF.DPTAL.TUNUYAN
+                viewUsersBtn.style.display = 'none'; // Ocultar para JEF.DPTAL.TUNUYAN
+                estadisticasBtn.style.display = 'block'; // Mostrar para JEF.DPTAL.TUNUYAN
+            } else if (userRole === 'JEF.DPTAL.SAN CARLOS') { // Rol JEF.DPTAL.SAN CARLOS
                 novedadesParteBtn.style.display = 'block';
                 verNovedadesBtn.style.display = 'block';
-                mapaDelictualBtn.style.display = 'block'; // Mostrar Mapa Delictual para JEF.DTAL.SAN CARLOS
-                registerUserDashboardBtn.style.display = 'none'; // Ocultar para JEF.DTAL.SAN CARLOS
-                viewUsersBtn.style.display = 'none'; // Ocultar para JEF.DTAL.SAN CARLOS
-                estadisticasBtn.style.display = 'none'; // Ocultar para JEF.DTAL.SAN CARLOS
-            } else if (userRole === 'JEF.DTAL.TUPUNGATO') { // Rol JEF.DTAL.TUPUNGATO
+                mapaDelictualBtn.style.display = 'block'; // Mostrar Mapa Delictual para JEF.DPTAL.SAN CARLOS
+                registerUserDashboardBtn.style.display = 'none'; // Ocultar para JEF.DPTAL.SAN CARLOS
+                viewUsersBtn.style.display = 'none'; // Ocultar para JEF.DPTAL.SAN CARLOS
+                estadisticasBtn.style.display = 'block'; // Mostrar para JEF.DPTAL.SAN CARLOS
+            } else if (userRole === 'JEF.DPTAL.TUPUNGATO') { // Rol JEF.DPTAL.TUPUNGATO
                 novedadesParteBtn.style.display = 'block';
                 verNovedadesBtn.style.display = 'block';
                 mapaDelictualBtn.style.display = 'block'; // Mostrar Mapa Delictual para JEF.DTAL.TUPUNGATO
