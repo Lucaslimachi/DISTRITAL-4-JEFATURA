@@ -14,16 +14,10 @@ app.use((req, res, next) => {
 
 const PORT = process.env.PORT || 3001; // Cambiado a 3001 temporalmente
 
-// Configuración de Sequelize para PostgreSQL
-const sequelize = new Sequelize('postgresql://distrital_4_jefatura_postgres_user:kVxxkk2xSD5PBqblPlGoylfPM93khoa8@dpg-d38quqogjchc73d9cnm0-a.oregon-postgres.render.com/distrital_4_jefatura_postgres', {
-  dialect: 'postgres',
-  protocol: 'postgres',
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false // Para Render.com, esto suele ser necesario
-    }
-  },
+// Configuración de Sequelize para SQLite
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: './database.sqlite', // Archivo de la base de datos
   logging: false // Deshabilita los logs de SQL de Sequelize
 });
 
@@ -31,9 +25,9 @@ const sequelize = new Sequelize('postgresql://distrital_4_jefatura_postgres_user
 async function connectDB() {
   try {
     await sequelize.authenticate();
-    console.log('BACKEND DEBUG: Conexión a la base de datos PostgreSQL establecida exitosamente.');
+    console.log('BACKEND DEBUG: Conexión a la base de datos SQLite establecida exitosamente.');
   } catch (error) {
-    console.error('BACKEND DEBUG: No se pudo conectar a la base de datos PostgreSQL:', error);
+    console.error('BACKEND DEBUG: No se pudo conectar a la base de datos SQLite:', error);
   }
 }
 
@@ -46,7 +40,7 @@ app.use(cors({
 app.use(express.json());
 
 // Archivos estáticos para el frontend (sirve el build de React/Vue/Angular)
-// app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname)); // Servir archivos estáticos desde el directorio raíz
 
 // Configuración de rutas de archivos para persistencia (eliminado, ahora usaremos DB)
 // const novedadesFilePath = path.join(__dirname, 'novedades.json');
@@ -190,7 +184,7 @@ async function syncDB() {
     const adminUser = await User.findOne({ where: { username: 'admin' } });
     if (!adminUser) {
       const hashedPassword = await bcrypt.hash('hijoteamo2', 10); // Contraseña por defecto
-      await User.create({ id: 1, username: 'admin', password: hashedPassword, role: 'admin' });
+      await User.create({ username: 'admin', password: hashedPassword, role: 'admin' });
       console.log('BACKEND DEBUG: Usuario admin creado si no existía.');
     }
 
@@ -198,8 +192,6 @@ async function syncDB() {
     console.error('BACKEND DEBUG: Error al sincronizar modelos o crear admin:', error);
   }
 }
-
-syncDB();
 
 // Middleware para autenticación JWT
 console.log('BACKEND DEBUG: Petición recibida antes de authenticateToken.'); // Nuevo log
@@ -327,13 +319,13 @@ app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-ofic
   const updatedNovedadData = req.body;
 
   try {
-    const [updatedRowsCount, updatedNovedades] = await Novedad.update(updatedNovedadData, {
+    const updatedRowsCount = await Novedad.update(updatedNovedadData, {
       where: { id: novedadId },
-      returning: true, // Esto es para PostgreSQL, devuelve las filas actualizadas
     });
 
     if (updatedRowsCount > 0) {
-      res.json(updatedNovedades[0]); // Devuelve la primera (y única) novedad actualizada
+      const updatedNovedad = await Novedad.findByPk(novedadId); // Volver a buscar la novedad actualizada
+      res.json(updatedNovedad);
     } else {
       res.status(404).json({ message: 'Novedad no encontrada' });
     }
@@ -422,7 +414,7 @@ app.post('/login', async (req, res) => {
     res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
   } catch (error) {
     console.error('BACKEND DEBUG: Error al iniciar sesión:', error);
-    res.status(500).json({ message: 'Error interno del servidor al iniciar sesión' });
+    res.status(500).json({ message: 'Error interno del servidor al iniciar sesión', error: error.message });
   }
 });
 
@@ -479,6 +471,15 @@ app.get('/', (req, res) => {
   res.send('Servidor backend funcionando!');
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
-});
+async function startServer() {
+  try {
+    await syncDB(); // Asegurarse de que la BD esté lista antes de iniciar
+    app.listen(PORT, () => {
+      console.log(`Servidor corriendo en el puerto ${PORT}`);
+    });
+  } catch (error) {
+    console.error('No se pudo iniciar el servidor:', error);
+  }
+}
+
+startServer();
