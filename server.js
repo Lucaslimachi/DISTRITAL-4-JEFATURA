@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const path = require('path'); // Import path module
 const { Sequelize, DataTypes } = require('sequelize');
 
 const app = express();
@@ -41,10 +40,6 @@ app.use(express.json());
 
 // Archivos estáticos para el frontend (sirve el build de React/Vue/Angular)
 app.use(express.static(__dirname)); // Servir archivos estáticos desde el directorio raíz
-
-// Configuración de rutas de archivos para persistencia (eliminado, ahora usaremos DB)
-// const novedadesFilePath = path.join(__dirname, 'novedades.json');
-// const usersFilePath = path.join(__dirname, 'users.json');
 
 // Clave secreta para JWT (debería ser una variable de entorno en producción)
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
@@ -194,7 +189,6 @@ async function syncDB() {
 }
 
 // Middleware para autenticación JWT
-console.log('BACKEND DEBUG: Petición recibida antes de authenticateToken.'); // Nuevo log
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -207,6 +201,20 @@ function authenticateToken(req, res, next) {
     next();
   });
 }
+
+const ALL_OFFICIAL_ROLES = [
+  'admin',
+  'user-oficiales',
+  'OFICIAL DE 15',
+  'OFICIAL DE 20',
+  'OFICIAL DE 65',
+  'OFICIAL DE 18',
+  'OFICIAL MANZANO HISTORICO',
+  'OFICIAL CORDON DEL PLATA',
+  'JEF.DTAL.TUNUYAN',
+  'JEF.DTAL.SAN CARLOS',
+  'JEF.DTAL.TUPUNGATO'
+];
 
 // Middleware para autorización de roles
 function authorizeRoles(roles) {
@@ -224,71 +232,37 @@ app.get('/novedades', authenticateToken, async (req, res) => {
   try {
     let novedades;
     
-    // Filtrar novedades según el rol del usuario
-    if (req.user.role === 'OFICIAL DE 15') {
-      // Solo mostrar novedades de Comisaría 15
+    // Define a map for roles to their respective dependencies
+    const roleDependencies = {
+      'OFICIAL DE 15': 'comisaria_15',
+      'OFICIAL DE 20': 'comisaria_20',
+      'OFICIAL DE 65': 'comisaria_65',
+      'OFICIAL DE 18': 'comisaria_18',
+      'OFICIAL MANZANO HISTORICO': 'subcomisaria_el_manzano',
+      'OFICIAL CORDON DEL PLATA': 'subcomisaria_cordon_del_plata',
+    };
+
+    // Define specific dependency groups for JEF.DTAL roles
+    const jefDtalDependencies = {
+      'JEF.DTAL.TUNUYAN': ['comisaria_15', 'comisaria_65', 'subcomisaria_el_manzano'],
+      'JEF.DTAL.SAN CARLOS': ['comisaria_18', 'comisaria_41'],
+      'JEF.DTAL.TUPUNGATO': ['comisaria_20', 'subcomisaria_cordon_del_plata', 'subcomisaria_san_jose'],
+    };
+
+    const userRole = req.user.role;
+
+    if (roleDependencies[userRole]) {
       novedades = await Novedad.findAll({
-        where: { dependencia: 'comisaria_15' }
+        where: { dependencia: roleDependencies[userRole] }
       });
-    } else if (req.user.role === 'OFICIAL DE 20') {
-      // Solo mostrar novedades de Comisaría 20
-      novedades = await Novedad.findAll({
-        where: { dependencia: 'comisaria_20' }
-      });
-    } else if (req.user.role === 'OFICIAL DE 65') {
-      // Solo mostrar novedades de Comisaría 65
-      novedades = await Novedad.findAll({
-        where: { dependencia: 'comisaria_65' }
-      });
-    } else if (req.user.role === 'OFICIAL DE 18') {
-      // Solo mostrar novedades de Comisaría 18
-      novedades = await Novedad.findAll({
-        where: { dependencia: 'comisaria_18' }
-      });
-    } else if (req.user.role === 'OFICIAL MANZANO HISTORICO') {
-      // Solo mostrar novedades de Subcomisaría El Manzano
-      novedades = await Novedad.findAll({
-        where: { dependencia: 'subcomisaria_el_manzano' }
-      });
-    } else if (req.user.role === 'OFICIAL CORDON DEL PLATA') {
-      // Solo mostrar novedades de Subcomisaría Cordon del Plata
-      novedades = await Novedad.findAll({
-        where: { dependencia: 'subcomisaria_cordon_del_plata' }
-      });
-    } else if (req.user.role === 'JEF.DTAL.TUNUYAN') {
-      // Solo mostrar novedades de Comisaría 15, Comisaría 65 y Subcomisaría El Manzano
+    } else if (jefDtalDependencies[userRole]) {
       novedades = await Novedad.findAll({
         where: {
-          [Sequelize.Op.or]: [
-            { dependencia: 'comisaria_15' },
-            { dependencia: 'comisaria_65' },
-            { dependencia: 'subcomisaria_el_manzano' }
-          ]
-        }
-      });
-    } else if (req.user.role === 'JEF.DTAL.SAN CARLOS') {
-      // Solo mostrar novedades de Comisaría 18 y Comisaría 41
-      novedades = await Novedad.findAll({
-        where: {
-          [Sequelize.Op.or]: [
-            { dependencia: 'comisaria_18' },
-            { dependencia: 'comisaria_41' }
-          ]
-        }
-      });
-    } else if (req.user.role === 'JEF.DTAL.TUPUNGATO') {
-      // Solo mostrar novedades de Comisaría 20, Subcomisaría Cordon del Plata y Subcomisaría San Jose
-      novedades = await Novedad.findAll({
-        where: {
-          [Sequelize.Op.or]: [
-            { dependencia: 'comisaria_20' },
-            { dependencia: 'subcomisaria_cordon_del_plata' },
-            { dependencia: 'subcomisaria_san_jose' }
-          ]
+          [Sequelize.Op.or]: jefDtalDependencies[userRole].map(dep => ({ dependencia: dep }))
         }
       });
     } else {
-      // Para admin y otros roles, mostrar todas las novedades
+      // For admin, user-oficiales, and other roles, show all novedades
       novedades = await Novedad.findAll();
     }
     
@@ -300,7 +274,7 @@ app.get('/novedades', authenticateToken, async (req, res) => {
 });
 
 // Guardar una nueva novedad
-app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18', 'OFICIAL MANZANO HISTORICO', 'OFICIAL CORDON DEL PLATA', 'JEF.DTAL.TUNUYAN', 'JEF.DTAL.SAN CARLOS', 'JEF.DTAL.TUPUNGATO']), async (req, res) => {
+app.post('/novedades', authenticateToken, authorizeRoles(ALL_OFFICIAL_ROLES), async (req, res) => {
   const newNovedadData = req.body;
   console.log('BACKEND DEBUG: Datos recibidos para nueva novedad:', newNovedadData); // Añadido para depuración
   try {
@@ -314,7 +288,7 @@ app.post('/novedades', authenticateToken, authorizeRoles(['admin', 'user-oficial
 });
 
 // Actualizar una novedad existente
-app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18', 'OFICIAL MANZANO HISTORICO', 'OFICIAL CORDON DEL PLATA', 'JEF.DTAL.TUNUYAN', 'JEF.DTAL.SAN CARLOS', 'JEF.DTAL.TUPUNGATO']), async (req, res) => {
+app.put('/novedades/:id', authenticateToken, authorizeRoles(ALL_OFFICIAL_ROLES), async (req, res) => {
   const novedadId = req.params.id;
   const updatedNovedadData = req.body;
 
@@ -337,7 +311,7 @@ app.put('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-ofic
 });
 
 // Eliminar una novedad
-app.delete('/novedades/:id', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18', 'OFICIAL MANZANO HISTORICO', 'OFICIAL CORDON DEL PLATA', 'JEF.DTAL.TUNUYAN', 'JEF.DTAL.SAN CARLOS', 'JEF.DTAL.TUPUNGATO']), async (req, res) => {
+app.delete('/novedades/:id', authenticateToken, authorizeRoles(ALL_OFFICIAL_ROLES), async (req, res) => {
   const novedadId = req.params.id;
 
   try {
@@ -448,21 +422,13 @@ app.get('/users', authenticateToken, authorizeRoles(['admin']), async (req, res)
 });
 
 // Ruta protegida de ejemplo (solo para administradores)
-app.get('/admin-dashboard', authenticateToken, authorizeRoles(['admin']), (req, res) => {
-  res.json({ message: `Bienvenido al panel de administración, ${req.user.username}!` });
-});
-
-// Ruta protegida de ejemplo (para usuarios normales y administradores)
-app.get('/user-dashboard', authenticateToken, authorizeRoles(['admin', 'user']), (req, res) => {
-  res.json({ message: `Bienvenido a tu panel, ${req.user.username}!` });
-});
 
 // Nuevas rutas protegidas para "Usuario-Oficiales", "admin", "OFICIAL DE 15", "OFICIAL DE 20", "OFICIAL DE 65", "OFICIAL DE 18", "OFICIAL MANZANO HISTORICO", "OFICIAL CORDON DEL PLATA", "JEF.DTAL.TUNUYAN" y "JEF.DTAL.SAN CARLOS"
-app.get('/novedades_parte', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18', 'OFICIAL MANZANO HISTORICO', 'OFICIAL CORDON DEL PLATA', 'JEF.DTAL.TUNUYAN', 'JEF.DTAL.SAN CARLOS', 'JEF.DTAL.TUPUNGATO']), (req, res) => {
+app.get('/novedades_parte', authenticateToken, authorizeRoles(ALL_OFFICIAL_ROLES), (req, res) => {
   res.json({ message: `Bienvenido a Parte de Novedades, ${req.user.username}!` });
 });
 
-app.get('/ver_novedades', authenticateToken, authorizeRoles(['admin', 'user-oficiales', 'OFICIAL DE 15', 'OFICIAL DE 20', 'OFICIAL DE 65', 'OFICIAL DE 18', 'OFICIAL MANZANO HISTORICO', 'OFICIAL CORDON DEL PLATA', 'JEF.DTAL.TUNUYAN', 'JEF.DTAL.SAN CARLOS', 'JEF.DTAL.TUPUNGATO']), (req, res) => {
+app.get('/ver_novedades', authenticateToken, authorizeRoles(ALL_OFFICIAL_ROLES), (req, res) => {
   res.json({ message: `Bienvenido a Ver Partes de Novedades, ${req.user.username}!` });
 });
 
